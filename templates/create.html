@@ -2,6 +2,7 @@
 <h1>{% block title %} create a new post {% endblock %}</h1>
 
 <form method="post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
     <div class="form-group">
         <label for="post_date">post date</label>
         <input

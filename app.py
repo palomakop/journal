@@ -20,6 +20,10 @@ import json
 import yaml
 from datetime import datetime, timezone, timedelta
 import re
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from flask_wtf.csrf import CSRFProtect
+
 
 # load environment variables
 load_dotenv()
@@ -44,6 +48,19 @@ def load_config():
 
 app = Flask(__name__)
 config = load_config()
+
+
+# csrf protection
+csrf = CSRFProtect(app)
+
+
+# rate limiting
+limiter = Limiter(
+    key_func=get_remote_address,
+    app=app,
+    default_limits=["200 per day", "50 per hour"]
+)
+
 
 # application settings - ensure numeric values are integers
 def get_int_config(key, default):
@@ -380,6 +397,7 @@ def post(post_date):
 
 
 @app.route('/login', methods=('GET', 'POST'))
+@limiter.limit("5 per minute")
 def login():
     if request.method == 'POST':
         username = request.form['username']

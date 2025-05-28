@@ -1,0 +1,186 @@
+html {
+    height: 100%;
+    padding: env(safe-area-inset); /* for iphone notch */
+    /* Prevent font scaling in landscape while allowing user zoom */
+    text-size-adjust: var(--text-size-adjust);
+    -webkit-text-size-adjust: var(--text-size-adjust);
+    -moz-text-size-adjust: var(--text-size-adjust);
+    scroll-behavior: smooth;
+}
+
+body {
+    background-color: rgb(232, 213, 178);
+    font-family: sans-serif;
+    margin: 0;
+    padding: 1rem;
+    line-height: 1.4;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+}
+
+h1 {
+    margin: 2.5rem 0 0.6rem;
+}
+
+.post-meta {
+    margin: 0.6em 0 1.6em;
+}
+
+.page-info {
+    font-style: italic;
+    opacity: 0.5;
+    margin-bottom: 1.6em;
+}
+
+.alert {
+    border: 1.5px solid black;
+    padding: 1rem;
+    margin: 1rem 0;
+    background: antiquewhite;
+}
+
+article a:has(h2) {
+    text-decoration: none;
+    display: inline-block;
+}
+
+article h2 {
+    margin: 0;
+}
+
+hr {
+    margin: 3em 0;
+}
+
+/* LINKS */
+
+a {
+    color: darkcyan;
+}
+
+a:hover {
+    color: mediumaquamarine;
+}
+
+/* BUTTONS & BADGES */
+
+header a,
+.post-meta a,
+.btn,
+.badge {
+    color: black;
+    text-decoration: none;
+    padding: 0.3rem 0.5rem 0.25rem;
+    border: 1.5px solid black;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-family: sans-serif;
+}
+
+header a:hover,
+.post-meta a:hover {
+    background-color: black;
+    color: antiquewhite;
+}
+
+.btn:hover {
+    background: black;
+    color: antiquewhite;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: black;
+    color: antiquewhite;
+}
+
+.btn-primary:hover {
+    background: antiquewhite;
+    color: black;
+}
+
+.btn-danger {
+    background: antiquewhite;
+    color: red;
+    border-color: red;
+}
+
+.btn-danger:hover {
+    background: red;
+    color: antiquewhite;
+}
+
+.badge {
+    background-color: black;
+    color: antiquewhite;
+    opacity: 0.5;
+}
+
+/* FORMS */
+
+form {
+    margin-bottom: 1em;
+}
+
+.form-group {
+    margin-bottom: 1em;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1.5px solid black;
+    background: antiquewhite;
+    font-family: sans-serif;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+/* IMAGES */
+
+.post-image {
+    margin: 2rem 0;
+    text-align: center;
+}
+
+.post-image img {
+    max-width: 100%;
+    height: auto;
+    max-height: 400px;
+    object-fit: contain;
+    border: 1.5px solid black;
+    box-shadow: 0.6rem 0.6rem 0 rgba(0, 0, 0, 0.2);
+}
+
+.post-content img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* PAGINATION */
+
+.pagination {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    margin: 2rem auto;
+    font-weight: bold;
+}
+
+.page-item a,
+.page-item span {
+    padding: 0.4rem;
+}
+
+.page-item.disabled {
+    opacity: 0.3;
+}

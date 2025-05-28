@@ -1,0 +1,8 @@
+journal_title: "paloma's journal"
+journal_description: "thoughts and happenings"
+
+upload_folder: 'uploads'
+optimized_folder: 'uploads/optimized'
+max_content_length: 16 * 1024 * 1024  # 16MB max file size
+posts_per_page: 15
+optimized_width: 1200 # optimized images will be x pixels wide

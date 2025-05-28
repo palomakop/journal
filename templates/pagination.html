@@ -1,0 +1,106 @@
+{% if pagination.total_pages > 1 %}
+<nav class="pagination-nav" aria-label="posts pagination">
+    <ul class="pagination">
+        <!-- first & previous pages -->
+        {% if pagination.has_prev %}
+        <li class="page-item">
+            <a
+                class="page-link"
+                href="{{ url_for('index', page=1) }}"
+                aria-label="first page"
+                >&lt;&lt;</a
+            >
+        </li>
+        <li class="page-item">
+            <a
+                class="page-link"
+                href="{{ url_for('index', page=pagination.prev_num) }}"
+                aria-label="previous page"
+                >&lt;</a
+            >
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <span class="page-link">&lt;&lt;</span>
+        </li>
+        <li class="page-item disabled">
+            <span class="page-link">&lt;</span>
+        </li>
+        {% endif %}
+
+        <!-- page numbers -->
+        {% set start_page = [pagination.page - 2, 1]|max %} {% set end_page =
+        [pagination.page + 2, pagination.total_pages]|min %} {% if start_page >
+        1 %}
+        <li class="page-item">
+            <a
+                class="page-link"
+                href="{{ url_for('index', page=1) }}"
+                aria-label="page 1"
+                >1</a
+            >
+        </li>
+        {% if start_page > 2 %}
+        <li class="page-item disabled">
+            <span class="page-link">...</span>
+        </li>
+        {% endif %} {% endif %} {% for page_num in range(start_page, end_page +
+        1) %}
+        <li
+            class="page-item {% if page_num == pagination.page %}active{% endif %}"
+        >
+            {% if page_num == pagination.page %}
+            <span class="page-link">{{ page_num }}</span>
+            {% else %}
+            <a
+                class="page-link"
+                href="{{ url_for('index', page=page_num) }}"
+                aria-label="page {{page_num}}"
+                >{{ page_num }}</a
+            >
+            {% endif %}
+        </li>
+        {% endfor %} {% if end_page < pagination.total_pages %} {% if end_page <
+        pagination.total_pages - 1 %}
+        <li class="page-item disabled">
+            <span class="page-link">...</span>
+        </li>
+        {% endif %}
+        <li class="page-item">
+            <a
+                class="page-link"
+                href="{{ url_for('index', page=pagination.total_pages) }}"
+                >{{ pagination.total_pages }}</a
+            >
+        </li>
+        {% endif %}
+
+        <!-- next & last pages -->
+        {% if pagination.has_next %}
+        <li class="page-item">
+            <a
+                class="page-link"
+                href="{{ url_for('index', page=pagination.next_num) }}"
+                aria-label="next page"
+                >&gt;</a
+            >
+        </li>
+        <li class="page-item">
+            <a
+                class="page-link"
+                href="{{ url_for('index', page=pagination.total_pages) }}"
+                aria-label="last page"
+                >&gt;&gt;</a
+            >
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <span class="page-link">&gt;</span>
+        </li>
+        <li class="page-item disabled">
+            <span class="page-link">&gt;&gt;</span>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}

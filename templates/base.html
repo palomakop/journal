@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, shrink-to-fit=no"
+        />
+
+        <link
+            rel="icon"
+            type="image/x-icon"
+            sizes="any"
+            href="{{ url_for('favicon') }}"
+        />
+        <link
+            rel="alternate"
+            type="application/rss+xml"
+            title="{{ journal_title }}"
+            href="{{ url_for('rss_feed') }}"
+        />
+
+        <link rel="stylesheet" href="/static/css/style.css" />
+
+        <title>{% block title %} {{ journal_title }} {% endblock %}</title>
+    </head>
+    <body>
+        <div class="container">
+            <header>
+                <div class="nav-left">
+                    <a href="{{ url_for('index') }}">{{ journal_title }}</a>
+                    <a href="{{ url_for('about') }}">about</a>
+                    {% if session.logged_in %}
+                    <a href="{{ url_for('create') }}">new post</a>
+                    {% endif %}
+                </div>
+                <div class="nav-right">
+                    {% if session.logged_in %}
+                    <span class="user-info">you are logged in</span>
+                    <a href="{{ url_for('logout') }}" class="logout-link"
+                        >logout</a
+                    >
+                    {% else %}
+                    <a href="{{ url_for('login') }}" class="login-link"
+                        >login</a
+                    >
+                    {% endif %}
+                </div>
+            </header>
+
+            {% with messages = get_flashed_messages() %} {% if messages %}
+            <div class="flash-messages">
+                {% for message in messages %}
+                <div class="alert alert-info">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %} {% endwith %} {% block content %} {% endblock %}
+        </div>
+    </body>
+</html>

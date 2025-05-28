@@ -1,0 +1,97 @@
+{% extends 'base.html' %} {% block content %}
+<h1>{% block title %} create a new post {% endblock %}</h1>
+
+<form method="post" enctype="multipart/form-data">
+    <div class="form-group">
+        <label for="post_date">post date</label>
+        <input
+            type="date"
+            name="post_date"
+            id="post_date"
+            class="form-control"
+            value="{{ request.form['post_date'] or default_date }}"
+            required
+        />
+        <small class="form-text text-muted"
+            >there can only be one post per day</small
+        >
+    </div>
+
+    <div class="form-group">
+        <label for="title">title</label>
+        <input
+            type="text"
+            name="title"
+            placeholder="post title"
+            class="form-control"
+            value="{{ request.form['title'] }}"
+            required
+        />
+    </div>
+
+    <div class="form-group">
+        <div class="form-check">
+            <input type="checkbox" name="is_private" id="is_private"
+            class="form-check-input" {% if request.form.get('is_private')
+            %}checked{% endif %}>
+            <label for="is_private" class="form-check-label">
+                <strong>private post?</strong>
+            </label>
+            <small class="form-text text-muted"
+                >private posts are only visible when logged in</small
+            >
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="content">post content</label>
+        <textarea
+            name="content"
+            id="content"
+            class="form-control"
+            rows="15"
+            required
+        >
+{{ request.form['content'] }}</textarea
+        >
+        <small class="form-text text-muted"
+            >you can use markdown for formatting</small
+        >
+    </div>
+
+    <div class="form-group">
+        <label for="image">image (optional)</label>
+        <input
+            type="file"
+            name="image"
+            id="image"
+            class="form-control-file"
+            accept=".jpg,.jpeg,.png,.gif,.webp,.heic"
+        />
+        <br />
+        <small class="form-text text-muted"
+            >max file size: 16MB; supported formats: JPG, PNG, GIF, WebP,
+            HEIC</small
+        >
+    </div>
+
+    <div class="form-group">
+        <label for="image_alt_text">image description (alt text)</label>
+        <input
+            type="text"
+            name="image_alt_text"
+            id="image_alt_text"
+            class="form-control"
+            placeholder="describe the image for accessibility (e.g., 'a sunset over the mountains')"
+            value="{{ request.form['image_alt_text'] }}"
+        />
+        <small class="form-text text-muted"
+            >provide a brief description of the image for screen readers and
+            accessibility (only needed if you upload an image)</small
+        >
+    </div>
+
+    <button type="submit" class="btn btn-primary">create post</button>
+</form>
+
+{% endblock %}

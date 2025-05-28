@@ -1,0 +1,48 @@
+{% extends 'base.html' %} {% block content %}
+<div class="post-header">
+    <h1>
+        {% block title %}{{ post['post_date'] }} - {{ post['title'] }}{%
+        endblock %}
+    </h1>
+    {% if post['is_private'] %}
+    <div class="post-meta">
+        <span class="badge">private</span>
+    </div>
+    {% endif %}
+</div>
+
+<div class="post-content">{{ post['content'] | markdown }}</div>
+
+{% if post['image_filename'] %}
+<div class="post-image">
+    <a
+        href="{{ url_for('uploaded_file', filename=post['image_filename']) }}"
+        target="_blank"
+        title="Click to view full resolution"
+    >
+        <img
+            src="{{ url_for('optimized_file', filename='opt_' + post['image_filename']) }}"
+            alt="{{ post['image_alt_text'] or 'Post image' }}"
+            class="post-attachment"
+            onerror="this.src='{{ url_for('uploaded_file', filename=post['image_filename']) }}';"
+        />
+    </a>
+</div>
+{% endif %} {% if session.logged_in %}
+<div class="post-actions">
+    <a
+        href="{{ url_for('edit', post_date=post['post_date']) }}"
+        class="btn btn-warning btn-sm"
+        >edit post</a
+    >
+    <a href="{{ url_for('index') }}" class="btn btn-secondary btn-sm"
+        >back to posts</a
+    >
+</div>
+{% else %}
+<div class="post-actions">
+    <a href="{{ url_for('index') }}" class="btn btn-secondary btn-sm"
+        >back to posts</a
+    >
+</div>
+{% endif %} {% endblock %}

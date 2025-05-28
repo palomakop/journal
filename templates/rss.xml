@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+    <channel>
+        <title>{{ journal_title }}</title>
+        <description>{{ journal_description }}</description>
+        <link>{{ request.url_root }}</link>
+        <atom:link href="{{ request.url }}" rel="self" type="application/rss+xml"/>
+        <language>en-us</language>
+        {% if posts %}
+        <lastBuildDate>{{ datetime.strptime(posts[0]['post_date'], '%Y-%m-%d').strftime('%a, %d %b %Y %H:%M:%S +0000') }}</lastBuildDate>
+        {% endif %}
+        <category>Personal Blog</category>
+        <ttl>1440</ttl>
+        
+        {% for post in posts %}
+        <item>
+            <title><![CDATA[{{ post['title'] }}]]></title>
+            <description><![CDATA[{{ (post['content'] | markdown | striptags)[:300] }}{% if post['content']|length > 300 %}...{% endif %}]]></description>
+            <content:encoded><![CDATA[
+                {% if post['image_filename'] %}
+                <img src="{{ request.url_root }}uploads/{{ post['image_filename'] }}" alt="Post image">
+                {% endif %}
+                {{ post['content'] | markdown }}
+            ]]></content:encoded>
+            <link>{{ request.url_root }}post/{{ post['post_date'] }}</link>
+            <guid isPermaLink="true">{{ request.url_root }}post/{{ post['post_date'] }}</guid>
+            <pubDate>{{ datetime.strptime(post['post_date'], '%Y-%m-%d').strftime('%a, %d %b %Y %H:%M:%S +0000') }}</pubDate>
+            {% if post['image_filename'] %}
+            <enclosure url="{{ request.url_root }}uploads/{{ post['image_filename'] }}" type="image/jpeg" length="0"/>
+            {% endif %}
+        </item>
+        {% endfor %}
+    </channel>
+</rss>

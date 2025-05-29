@@ -73,10 +73,15 @@ flask run
 i am running my journal instance on a raspberry pi 400 running debian/raspbian.
 
 this will vary depending on where you host it, but here are the steps i followed for my own reference:
-- burn SD card image for the lastest raspbian (using raspberry pi imager). enabled SSH.
-- booted up the pi plugged into ethernet.
+- burn SD card image for the lastest raspbian (using raspberry pi imager)
+- booted up the pi plugged into ethernet
+- SSH'd in and updated packages
+- git cloned the repo
+- followed steps above for initial setup
 
 i plan to serve it with nginx and gunicorn.
+
+note to self: also set up firewall.
 
 will put more notes here once i figure out the steps for that.
 

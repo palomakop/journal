@@ -55,10 +55,13 @@ csrf = CSRFProtect(app)
 
 
 # rate limiting
+# add a redis url to env vars if you want to use it for rate limiting storage
+storage_uri = os.getenv('REDIS_URL', 'memory://')
 limiter = Limiter(
     key_func=get_remote_address,
     app=app,
-    default_limits=["200 per day", "50 per hour"]
+    default_limits=["200 per day", "50 per hour"],
+    storage_uri=storage_uri
 )
 
 

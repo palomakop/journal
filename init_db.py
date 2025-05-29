@@ -34,9 +34,6 @@ cur.execute("""INSERT INTO posts (title, content, post_date, is_private, image_f
 connection.commit()
 connection.close()
 
-print("Database initialized successfully!")
-print("Created directories: uploads/, uploads/optimized/")
-print("Inserted 2 sample posts")
-print("\nNext steps:")
-print("1. Install Pillow for image optimization: pip install Pillow==10.4.0")
-print("2. Start your Flask application")
+print("database initialized successfully!")
+print("created directories: uploads/, uploads/optimized/")
+print("inserted 2 sample posts")

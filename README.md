@@ -70,7 +70,13 @@ flask run
 
 ## run in prod
 
-i haven't done this yet but i plan to run it on debian with nginx and gunicorn.
+i am running my journal instance on a raspberry pi 400 running debian/raspbian.
+
+this will vary depending on where you host it, but here are the steps i followed for my own reference:
+- burn SD card image for the lastest raspbian (using raspberry pi imager). enabled SSH.
+- booted up the pi plugged into ethernet.
+
+i plan to serve it with nginx and gunicorn.
 
 will put more notes here once i figure out the steps for that.
 

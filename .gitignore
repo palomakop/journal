@@ -3,3 +3,4 @@ my_env
 uploads
 database.db
 .DS_Store
+.env

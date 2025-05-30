@@ -60,7 +60,11 @@ storage_uri = os.getenv('REDIS_URL', 'memory://')
 limiter = Limiter(
     key_func=get_remote_address,
     app=app,
-    default_limits=["200 per day", "50 per hour"],
+    default_limits=[
+        "5000 per day",
+        "500 per hour",
+        "50 per minute"
+    ]
     storage_uri=storage_uri
 )
 

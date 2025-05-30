@@ -45,7 +45,7 @@ export FLASK_DEBUG=1
 flask run
 ```
 
-you can also edit config.yaml with your name and site title.
+edit config.yaml with your name and site title, and edit about.html to customize the about page. you will need to fork the repo to do that for now since those files are currently tracked in git.
 
 the username for logging in to the web app is 'admin' and the password is the one you created the hash for.
 
@@ -73,16 +73,22 @@ flask run
 i am running my journal instance on a raspberry pi 400 running debian/raspbian.
 
 this will vary depending on where you host it, but here are the steps i followed for my own reference:
-- burn SD card image for the lastest raspbian (using raspberry pi imager)
+- burn SD card image for the lastest raspbian (using raspberry pi imager) - bookworm
 - booted up the pi plugged into ethernet
 - SSH'd in and updated packages
 - git cloned the repo
 - followed steps above for initial setup
+- installed and started redis ([reference](https://pimylifeup.com/raspberry-pi-redis/))
+    - note: got an error when trying to enable redis.service via the symlink so i had to run `sudo systemctl enable /lib/systemd/system/redis-server.service`
+- added `export REDIS_URL=redis://localhost:6379` to environment vars
+- installed nginx, certbot, and ufw
+    - sort of followed [this tutorial](https://medium.com/@kawsarlog/from-flask-to-live-deploying-your-app-with-nginx-gunicorn-ssl-and-custom-domain-1e8b57709fc0) to set up nginx and gunicorn to serve the app
+- started nginx
+- set up https with let's encrypt
+- set up port forwarding on my router to forward 80 and 443 to my pi
+- created an A DNS record pointing to my home network IPv4 address (we have a static ip already)
+- activated the python virtual environment and installed gunicorn and redis
+- set up a systemctl service for gunicorn
 
-i plan to serve it with nginx and gunicorn.
-
-note to self: also set up firewall.
-
-will put more notes here once i figure out the steps for that.
-
-also need to set up backups for image files and database.
+to do:
+- set up backups for image files and database. (will probably just set up a cron job on my main computer to run an "scp" command)

@@ -64,7 +64,7 @@ limiter = Limiter(
         "5000 per day",
         "500 per hour",
         "50 per minute"
-    ]
+    ],
     storage_uri=storage_uri
 )
 

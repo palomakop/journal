@@ -254,3 +254,72 @@ form summary::marker {
 .page-item.disabled {
     opacity: 0.3;
 }
+
+/* LIGHTBOX */
+.lightbox {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: none;
+    z-index: 1000;
+    padding: 0.3rem;
+    box-sizing: border-box;
+}
+
+.lightbox-content {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lightbox img {
+    max-width: calc(90% - 1rem);
+    max-height: calc(90% - 1rem);
+    object-fit: contain;
+}
+
+.lightbox-close, .lightbox-nav {
+    position: absolute;
+    opacity:0.6;
+    border-radius: 2rem;
+    cursor: pointer;
+    padding: 0.1rem 0.8rem 0.3rem;
+    font-size:1.5rem;
+    color:antiquewhite;
+    background:rgba(0, 0, 0, 0.5);
+    border:1.5px solid rgb(250, 235, 215, 0.5);
+}
+
+.lightbox-close {
+    top: 1rem;
+    right: 1rem;
+}
+
+.lightbox-nav {
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.lightbox-nav:hover, .lightbox-close:hover {
+    opacity: 1;
+}
+
+.lightbox-prev {
+    left: 0rem;
+}
+
+.lightbox-next {
+    right: 0rem;
+}
+
+.lightbox-loading {
+    color: antiquewhite;
+    font-size: 1.2rem;
+    text-align: center;
+}

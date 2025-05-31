@@ -106,7 +106,7 @@ ALLOWED_EXTENSIONS = set(config.get('allowed_extensions', default_extensions))
 if HEIC_SUPPORTED:
     ALLOWED_EXTENSIONS.update(['heic', 'heif'])
 
-MAX_CONTENT_LENGTH = get_int_config('max_content_length', 16 * 1024 * 1024)
+MAX_CONTENT_LENGTH = get_int_config('max_content_length', 300 * 1024 * 1024)
 POSTS_PER_PAGE = get_int_config('posts_per_page', 15)
 OPTIMIZED_WIDTH = get_int_config('optimized_width', 1200)
 

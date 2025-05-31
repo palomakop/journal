@@ -17,16 +17,20 @@
             <title><![CDATA[{{ post['title'] }}]]></title>
             <description><![CDATA[{{ (post['content'] | markdown | striptags)[:300] }}{% if post['content']|length > 300 %}...{% endif %}]]></description>
             <content:encoded><![CDATA[
-                {% if post['image_filename'] %}
-                <img src="{{ request.url_root }}uploads/{{ post['image_filename'] }}" alt="Post image">
-                {% endif %}
                 {{ post['content'] | markdown }}
+                {% if post['images'] %}
+                <div style="margin-top: 2em;">
+                {% for image in post['images'] %}
+                <p><img src="{{ request.url_root }}uploads/optimized/opt_{{ image.filename }}" alt="{{ image.alt_text or 'Post image' }}" style="max-width: 100%; height: auto;"></p>
+                {% endfor %}
+                </div>
+                {% endif %}
             ]]></content:encoded>
             <link>{{ request.url_root }}post/{{ post['post_date'] }}</link>
             <guid isPermaLink="true">{{ request.url_root }}post/{{ post['post_date'] }}</guid>
             <pubDate>{{ datetime.strptime(post['post_date'], '%Y-%m-%d').strftime('%a, %d %b %Y %H:%M:%S +0000') }}</pubDate>
-            {% if post['image_filename'] %}
-            <enclosure url="{{ request.url_root }}uploads/{{ post['image_filename'] }}" type="image/jpeg" length="0"/>
+            {% if post['images'] %}
+            <enclosure url="{{ request.url_root }}uploads/optimized/opt_{{ post['images'][0].filename }}" type="image/jpeg" length="0"/>
             {% endif %}
         </item>
         {% endfor %}

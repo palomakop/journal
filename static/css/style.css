@@ -91,7 +91,7 @@ header a,
     display:inline-block;
 }
 
-input::file-selector-button, button.btn {
+input::file-selector-button, button.btn, input[type=submit] {
     padding:0.3em 0.5em;
     cursor:pointer;
 }
@@ -172,7 +172,7 @@ form small {
 form input::file-selector-button {
     text-transform:lowercase;
     background-color:antiquewhite;
-    margin:0 1ch;
+    margin-right:1ch;
     cursor:pointer;
 }
 
@@ -181,11 +181,43 @@ form input::file-selector-button:hover {
     background-color:black;
 }
 
+form .new-img, form .current-img {
+    display:flex;
+    flex-direction:column;
+}
+
+form .current-img {
+    margin-top:1.3em;
+}
+
+form .new-img h3 {
+    margin:1em 0 0.3em;
+}
+
+form .remove-img {
+    margin-top:0.3em;
+}
+
+input[type=file] {
+    margin-bottom:0.3em;
+}
+
+form .img-thumbnail {
+    width:300px;
+    max-width:100%;
+    margin-bottom:0.3em;
+}
+
+form summary::marker {
+    font-size:1.5rem;
+}
+
 /* IMAGES */
 
 .post-image {
     margin: 2rem 0;
     text-align: center;
+    padding-right:0.5rem;
 }
 
 .post-image img {
@@ -195,6 +227,7 @@ form input::file-selector-button:hover {
     object-fit: contain;
     border: 1.5px solid black;
     box-shadow: 0.6rem 0.6rem 0 rgba(0, 0, 0, 0.2);
+    box-sizing:border-box;
 }
 
 .post-content img {

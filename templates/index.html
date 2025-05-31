@@ -17,20 +17,24 @@
         {% endif %}
         <a href="{{ url_for('edit', post_date=post['post_date']) }}">edit</a>
     </div>
-    {% endif %} {{ post['content'] | markdown }} {% if post['image_filename'] %}
-    <div class="post-image">
-        <a
-            href="{{ url_for('uploaded_file', filename=post['image_filename']) }}"
-            target="_blank"
-        >
-            <img
-                src="{{ url_for('optimized_file', filename='opt_' + post['image_filename']) }}"
-                loading="lazy"
-                alt="{{ post['image_alt_text'] or 'Post image' }}"
-                class="post-attachment"
-                onerror="this.src='{{ url_for('uploaded_file', filename=post['image_filename']) }}'"
-            />
-        </a>
+    {% endif %} {{ post['content'] | markdown }} {% if post.images %}
+    <div class="post-images">
+        {% for image in post.images %}
+        <div class="post-image">
+            <a
+                href="{{ url_for('uploaded_file', filename=image.filename) }}"
+                target="_blank"
+            >
+                <img
+                    src="{{ url_for('optimized_file', filename='opt_' + image.filename) }}"
+                    loading="lazy"
+                    alt="{{ image.alt_text or 'Post image' }}"
+                    class="post-attachment"
+                    onerror="this.src='{{ url_for('uploaded_file', filename=image.filename) }}'"
+                />
+            </a>
+        </div>
+        {% endfor %}
     </div>
     {% endif %}
 </article>

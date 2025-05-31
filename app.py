@@ -247,6 +247,65 @@ def get_post_by_id(post_id):
     return post
 
 
+def get_post_images(post_id):
+    """Get all images for a post, ordered by sort_order"""
+    conn = get_db_connection()
+    images = conn.execute(
+        'SELECT * FROM post_images WHERE post_id = ? ORDER BY sort_order, id',
+        (post_id,)
+    ).fetchall()
+    conn.close()
+    return images
+
+
+def process_uploaded_images(request, post_date):
+    """Process multiple uploaded images and return list of processed filenames and alt texts"""
+    processed_images = []
+    
+    for i in range(1, 6):  # Handle up to 5 images
+        file_key = f'image_{i}'
+        alt_key = f'alt_text_{i}'
+        
+        if file_key in request.files:
+            file = request.files[file_key]
+            alt_text = request.form.get(alt_key, '').strip() or None
+            
+            if file and file.filename and allowed_file(file.filename):
+                # Generate random filename with date prefix
+                image_filename = generate_random_filename(file.filename, post_date)
+                
+                # Save original image with metadata stripped
+                original_path = os.path.join(app.config['UPLOAD_FOLDER'], image_filename)
+                
+                # Save to temporary location first
+                temp_path = os.path.join(tempfile.gettempdir(), f"temp_{image_filename}")
+                file.save(temp_path)
+                
+                # Strip metadata and save to final location
+                if strip_image_metadata(temp_path, original_path):
+                    # Create optimized version
+                    optimized_filename = f"opt_{image_filename}"
+                    optimized_path = os.path.join(OPTIMIZED_FOLDER, optimized_filename)
+                    
+                    if optimize_image(temp_path, optimized_path):
+                        print(f"created optimized image: {optimized_filename}")
+                    else:
+                        print("failed to create optimized image, using original")
+                    
+                    processed_images.append((image_filename, alt_text, i-1))  # sort_order = i-1
+                    
+                    # Clean up temp file
+                    if os.path.exists(temp_path):
+                        os.remove(temp_path)
+                else:
+                    print("failed to strip metadata from original image")
+                    # Clean up temp file
+                    if os.path.exists(temp_path):
+                        os.remove(temp_path)
+    
+    return processed_images
+
+
 def login_required(f):
     """decorator to require login for certain routes"""
     @wraps(f)
@@ -346,9 +405,17 @@ def rss_feed():
     posts = conn.execute(
         'SELECT * FROM posts WHERE is_private = 0 ORDER BY post_date DESC LIMIT 50'
     ).fetchall()
+    
+    # add images to each post
+    posts_with_images = []
+    for post in posts:
+        post_dict = dict(post)
+        post_dict['images'] = get_post_images(post['id'])
+        posts_with_images.append(post_dict)
+    
     conn.close()
     
-    response = render_template('rss.xml', posts=posts, datetime=datetime)
+    response = render_template('rss.xml', posts=posts_with_images, datetime=datetime)
     return app.response_class(response, mimetype='application/rss+xml')
 
 
@@ -372,6 +439,14 @@ def index():
     
     # get posts for current page
     posts = conn.execute(posts_query, (POSTS_PER_PAGE, offset)).fetchall()
+    
+    # add images to each post
+    posts_with_images = []
+    for post in posts:
+        post_dict = dict(post)
+        post_dict['images'] = get_post_images(post['id'])
+        posts_with_images.append(post_dict)
+    
     conn.close()
     
     # create pagination object
@@ -385,7 +460,7 @@ def index():
         'total': total
     }
     
-    return render_template('index.html', posts=posts, pagination=pagination)
+    return render_template('index.html', posts=posts_with_images, pagination=pagination)
 
 
 @app.route('/post/<post_date>')
@@ -396,7 +471,10 @@ def post(post_date):
     if post['is_private'] and not session.get('logged_in'):
         abort(404)
     
-    return render_template('post.html', post=post)
+    # get images for this post
+    images = get_post_images(post['id'])
+    
+    return render_template('post.html', post=post, images=images)
 
 
 @app.route('/login', methods=('GET', 'POST'))
@@ -452,55 +530,30 @@ def create():
         post_date = request.form.get('post_date', date.today().isoformat())
         is_private = 'is_private' in request.form
         
-        # handle image upload
-        image_filename = None
-        image_alt_text = request.form.get('image_alt_text', '').strip() or None
-        
-        if 'image' in request.files:
-            file = request.files['image']
-            if file and file.filename and allowed_file(file.filename):
-                # generate random filename with date prefix
-                image_filename = generate_random_filename(file.filename, post_date)
-                
-                # save original image with metadata stripped
-                original_path = os.path.join(app.config['UPLOAD_FOLDER'], image_filename)
-                
-                # save to temporary location first
-                temp_path = os.path.join(tempfile.gettempdir(), f"temp_{image_filename}")
-                file.save(temp_path)
-                
-                # strip metadata and save to final location
-                if strip_image_metadata(temp_path, original_path):
-                    # create optimized version
-                    optimized_filename = f"opt_{image_filename}"
-                    optimized_path = os.path.join(OPTIMIZED_FOLDER, optimized_filename)
-                    
-                    if optimize_image(temp_path, optimized_path):
-                        print(f"created optimized image: {optimized_filename}")
-                    else:
-                        print("failed to create optimized image, using original")
-                    
-                    # clean up temp file
-                    if os.path.exists(temp_path):
-                        os.remove(temp_path)
-                else:
-                    print("failed to strip metadata from original image")
-                    # clean up temp file
-                    if os.path.exists(temp_path):
-                        os.remove(temp_path)
-                    image_filename = None
-            elif image_alt_text:
-                # clear alt text if no image was uploaded
-                image_alt_text = None
-
         if not title:
             flash('title is required!')
         else:
             conn = None
             try:
                 conn = get_db_connection()
-                conn.execute('INSERT INTO posts (title, content, post_date, is_private, image_filename, image_alt_text) VALUES (?, ?, ?, ?, ?, ?)',
-                             (title, content, post_date, is_private, image_filename, image_alt_text))
+                
+                # insert post and get the post ID
+                cursor = conn.execute(
+                    'INSERT INTO posts (title, content, post_date, is_private) VALUES (?, ?, ?, ?)',
+                    (title, content, post_date, is_private)
+                )
+                post_id = cursor.lastrowid
+                
+                # process uploaded images
+                processed_images = process_uploaded_images(request, post_date)
+                
+                # save each processed image
+                for filename, alt_text, sort_order in processed_images:
+                    conn.execute(
+                        'INSERT INTO post_images (post_id, filename, alt_text, sort_order) VALUES (?, ?, ?, ?)',
+                        (post_id, filename, alt_text, sort_order)
+                    )
+                
                 conn.commit()
                 flash('post created successfully!')
                 return redirect(url_for('post', post_date=post_date))
@@ -522,6 +575,7 @@ def create():
 @login_required
 def edit(post_date):
     post = get_post_by_date(post_date)
+    existing_images = get_post_images(post['id'])
 
     if request.method == 'POST':
         title = request.form['title']
@@ -529,79 +583,55 @@ def edit(post_date):
         new_post_date = request.form.get('post_date', post['post_date'])
         is_private = 'is_private' in request.form
         
-        # handle image upload
-        image_filename = post['image_filename']  # keep existing image by default
-        image_alt_text = request.form.get('image_alt_text', '').strip() or None
-        
-        if 'image' in request.files:
-            file = request.files['image']
-            if file and file.filename and allowed_file(file.filename):
-                # delete old images if they exist
-                if image_filename:
-                    old_original_path = os.path.join(app.config['UPLOAD_FOLDER'], image_filename)
-                    old_optimized_path = os.path.join(OPTIMIZED_FOLDER, f"opt_{image_filename}")
-                    
-                    if os.path.exists(old_original_path):
-                        os.remove(old_original_path)
-                    if os.path.exists(old_optimized_path):
-                        os.remove(old_optimized_path)
-                
-                # generate random filename with date prefix
-                image_filename = generate_random_filename(file.filename, new_post_date)
-                
-                # save original image with metadata stripped
-                original_path = os.path.join(app.config['UPLOAD_FOLDER'], image_filename)
-                
-                # save to temporary location first
-                temp_path = os.path.join(tempfile.gettempdir(), f"temp_{image_filename}")
-                file.save(temp_path)
-                
-                # strip metadata and save to final location
-                if strip_image_metadata(temp_path, original_path):
-                    # create optimized version
-                    optimized_filename = f"opt_{image_filename}"
-                    optimized_path = os.path.join(OPTIMIZED_FOLDER, optimized_filename)
-                    
-                    if optimize_image(temp_path, optimized_path):
-                        print(f"created optimized image: {optimized_filename}")
-                    else:
-                        print("failed to create optimized image, using original")
-                    
-                    # clean up temp file
-                    if os.path.exists(temp_path):
-                        os.remove(temp_path)
-                else:
-                    print("failed to strip metadata from original image")
-                    # clean up temp file
-                    if os.path.exists(temp_path):
-                        os.remove(temp_path)
-                    image_filename = post['image_filename']  # revert to original
-        
-        # handle image removal
-        if 'remove_image' in request.form and image_filename:
-            old_original_path = os.path.join(app.config['UPLOAD_FOLDER'], image_filename)
-            old_optimized_path = os.path.join(OPTIMIZED_FOLDER, f"opt_{image_filename}")
-            
-            if os.path.exists(old_original_path):
-                os.remove(old_original_path)
-            if os.path.exists(old_optimized_path):
-                os.remove(old_optimized_path)
-            image_filename = None
-            image_alt_text = None
-
-        # if no image, clear alt text
-        if not image_filename:
-            image_alt_text = None
-
         if not title:
             flash('title is required!')
         else:
             conn = None
             try:
                 conn = get_db_connection()
-                conn.execute('UPDATE posts SET title = ?, content = ?, post_date = ?, is_private = ?, image_filename = ?, image_alt_text = ?'
-                             ' WHERE post_date = ?',
-                             (title, content, new_post_date, is_private, image_filename, image_alt_text, post_date))
+                
+                # handle existing image updates and deletions
+                for image in existing_images:
+                    # check if image should be removed
+                    if f'remove_image_{image["id"]}' in request.form:
+                        # delete files
+                        if image['filename']:
+                            original_path = os.path.join(app.config['UPLOAD_FOLDER'], image['filename'])
+                            optimized_path = os.path.join(OPTIMIZED_FOLDER, f"opt_{image['filename']}")
+                            
+                            if os.path.exists(original_path):
+                                os.remove(original_path)
+                            if os.path.exists(optimized_path):
+                                os.remove(optimized_path)
+                        
+                        # delete database record
+                        conn.execute('DELETE FROM post_images WHERE id = ?', (image['id'],))
+                    else:
+                        # update alt text
+                        new_alt_text = request.form.get(f'existing_alt_{image["id"]}', '').strip() or None
+                        conn.execute(
+                            'UPDATE post_images SET alt_text = ? WHERE id = ?',
+                            (new_alt_text, image['id'])
+                        )
+                
+                # process new uploaded images
+                processed_images = process_uploaded_images(request, new_post_date)
+                
+                # save each new processed image
+                for filename, alt_text, sort_order in processed_images:
+                    # Adjust sort_order to come after existing images
+                    adjusted_sort_order = len(existing_images) + sort_order
+                    conn.execute(
+                        'INSERT INTO post_images (post_id, filename, alt_text, sort_order) VALUES (?, ?, ?, ?)',
+                        (post['id'], filename, alt_text, adjusted_sort_order)
+                    )
+                
+                # update post
+                conn.execute(
+                    'UPDATE posts SET title = ?, content = ?, post_date = ?, is_private = ? WHERE id = ?',
+                    (title, content, new_post_date, is_private, post['id'])
+                )
+                
                 conn.commit()
                 flash('post updated successfully!')
                 return redirect(url_for('post', post_date=new_post_date))
@@ -614,7 +644,7 @@ def edit(post_date):
                 if conn:
                     conn.close()
 
-    return render_template('edit.html', post=post)
+    return render_template('edit.html', post=post, existing_images=existing_images)
 
 
 @app.route('/delete/<post_date>', methods=('POST',))
@@ -622,20 +652,26 @@ def edit(post_date):
 def delete(post_date):
     post = get_post_by_date(post_date)
     
-    # delete associated images if they exist
-    if post['image_filename']:
-        original_path = os.path.join(app.config['UPLOAD_FOLDER'], post['image_filename'])
-        optimized_path = os.path.join(OPTIMIZED_FOLDER, f"opt_{post['image_filename']}")
-        
-        if os.path.exists(original_path):
-            os.remove(original_path)
-        if os.path.exists(optimized_path):
-            os.remove(optimized_path)
+    # get all images for this post
+    images = get_post_images(post['id'])
+    
+    # delete all associated image files
+    for image in images:
+        if image['filename']:
+            original_path = os.path.join(app.config['UPLOAD_FOLDER'], image['filename'])
+            optimized_path = os.path.join(OPTIMIZED_FOLDER, f"opt_{image['filename']}")
+            
+            if os.path.exists(original_path):
+                os.remove(original_path)
+            if os.path.exists(optimized_path):
+                os.remove(optimized_path)
     
     conn = get_db_connection()
-    conn.execute('DELETE FROM posts WHERE post_date = ?', (post_date,))
+    # delete post (images will be deleted automatically due to CASCADE)
+    conn.execute('DELETE FROM posts WHERE id = ?', (post['id'],))
     conn.commit()
     conn.close()
+    
     flash('"{}" was successfully deleted!'.format(post['title']))
     return redirect(url_for('index'))
 

@@ -60,36 +60,33 @@
         >
     </div>
 
-    <div class="form-group">
-        <label for="image">image (optional)</label>
-        <input
-            type="file"
-            name="image"
-            id="image"
-            class="form-control-file"
-            accept=".jpg,.jpeg,.png,.gif,.webp,.heic"
-        />
+    <details class="form-group">
+        <summary><h2 style="display:inline-block">images (optional)</h2></summary>
         <small class="form-text text-muted"
-            >max file size: 16MB; supported formats: JPG, PNG, GIF, WebP,
-            HEIC</small
+            >you can upload up to 5 images. max file size: 16MB each; supported formats: JPG, PNG, GIF, WebP, HEIC</small
         >
-    </div>
-
-    <div class="form-group">
-        <label for="image_alt_text">image description (alt text)</label>
-        <input
-            type="text"
-            name="image_alt_text"
-            id="image_alt_text"
-            class="form-control"
-            placeholder="describe the image for accessibility (e.g., 'a sunset over the mountains')"
-            value="{{ request.form['image_alt_text'] }}"
-        />
-        <small class="form-text text-muted"
-            >provide a brief description of the image for screen readers and
-            accessibility (only needed if you upload an image)</small
-        >
-    </div>
+        
+        {% for i in range(1, 6) %}
+        <div class="new-img">
+            <label for="image_{{ i }}"><h3>image {{ i }}</h3></label>
+            <input
+                type="file"
+                name="image_{{ i }}"
+                id="image_{{ i }}"
+                accept=".jpg,.jpeg,.png,.gif,.webp,.heic"
+            />
+            <label for="alt_text_{{ i }}">description</label>
+            <input
+                type="text"
+                name="alt_text_{{ i }}"
+                id="alt_text_{{ i }}"
+                placeholder="describe this image for accessibility"
+                value="{{ request.form['alt_text_' + i|string] }}"
+                class="form-control"
+            />
+        </div>
+        {% endfor %}
+    </details>
 
     <button type="submit" class="btn btn-primary">create post</button>
 </form>

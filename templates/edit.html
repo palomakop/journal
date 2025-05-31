@@ -60,60 +60,71 @@
         >
     </div>
 
+    {% if existing_images %}
     <div class="form-group">
-        <label for="image">image (optional)</label>
-        {% if post['image_filename'] %}
-        <div class="current-image mb-2">
+        <label><h2>current images</h2></label>
+        {% for image in existing_images %}
+        <div class="current-img">
             <img
-                src="{{ url_for('uploaded_file', filename=post['image_filename']) }}"
-                alt="{{ post['image_alt_text'] or 'Current post image' }}"
                 class="img-thumbnail"
-                style="max-height: 200px"
+                src="{{ url_for('uploaded_file', filename=image.filename) }}"
+                alt="{{ image.alt_text or 'Post image' }}"
             />
-            <div class="form-check mt-2">
+            <label for="existing_alt_{{ image.id }}">description</label>
+            <input
+                type="text"
+                name="existing_alt_{{ image.id }}"
+                id="existing_alt_{{ image.id }}"
+                value="{{ image.alt_text or '' }}"
+                placeholder="describe this image for accessibility"
+                class="form-control"
+            />
+            <div class="remove-img">
                 <input
                     type="checkbox"
-                    name="remove_image"
-                    id="remove_image"
-                    class="form-check-input"
+                    name="remove_image_{{ image.id }}"
+                    id="remove_image_{{ image.id }}"
                 />
-                <label for="remove_image" class="form-check-label"
-                    >remove current image</label
-                >
+                <label for="remove_image_{{ image.id }}">
+                    <strong>remove this image</strong>
+                </label>
             </div>
         </div>
-        {% endif %}
-        <input
-            type="file"
-            name="image"
-            id="image"
-            class="form-control-file"
-            accept=".jpg,.jpeg,.png,.gif,.webp,.heic"
-        />
-        <small class="form-text text-muted"
-            >max file size: 16MB; supported formats: JPG, PNG, GIF, WebP,
-            HEIC</small
-        >
+        {% endfor %}
     </div>
+    {% endif %}
 
-    <div class="form-group">
-        <label for="image_alt_text">image description (alt text)</label>
-        <input
-            type="text"
-            name="image_alt_text"
-            id="image_alt_text"
-            class="form-control"
-            placeholder="describe the image for accessibility (e.g., 'a sunset over the mountains')"
-            value="{{ request.form['image_alt_text'] or post['image_alt_text'] or '' }}"
-        />
+    <details class="form-group">
+        <summary><h2 style="display:inline-block">add new images (optional)</h2></summary>
         <small class="form-text text-muted"
-            >provide a brief description of the image for screen readers and
-            accessibility (only needed if you have an image)</small
+            >you can upload up to 5 additional images. max file size: 16MB each; supported formats: JPG, PNG, GIF, WebP, HEIC</small
         >
-    </div>
+        
+        {% for i in range(1, 6) %}
+        <div class="new-img">
+            <label for="image_{{ i }}"><h3>new image {{ i }}</h3></label>
+            <input
+                type="file"
+                name="image_{{ i }}"
+                id="image_{{ i }}"
+                accept=".jpg,.jpeg,.png,.gif,.webp,.heic"
+            />
+            <label for="alt_text_{{ i }}">description</label>
+            <input
+                type="text"
+                name="alt_text_{{ i }}"
+                id="alt_text_{{ i }}"
+                placeholder="describe this image for accessibility"
+                value="{{ request.form['alt_text_' + i|string] }}"
+                class="form-control"
+            />
+        </div>
+        {% endfor %}
+    </details>
 
     <button type="submit" class="btn btn-primary">update post</button>
 </form>
+
 <form
     action="{{ url_for('delete', post_date=post['post_date']) }}"
     method="POST"
@@ -123,7 +134,8 @@
         type="submit"
         value="delete post"
         class="btn btn-danger btn-sm"
-        onclick="return confirm('are you sure you want to delete this post? this will also delete any attached image.')"
+        onclick="return confirm('are you sure you want to delete this post? this will also delete all attached images.')"
     />
 </form>
+
 {% endblock %}

@@ -1,6 +1,6 @@
 # journal-flask
 
-a minimal journaling web app.
+a minimal, single-user journaling web app.
 
 view my instance here: [journal.palomakop.tv](https://journal.palomakop.tv)
 
@@ -12,6 +12,7 @@ features:
 - follows [html journal spec](https://journal.miso.town/)
 - posts can have images, images are optimized but you can view full size by clicking them, also you can add alt text
 - you can use markdown in posts for formatting
+- posts can be private or public. private posts can only be seen by the user. they also don't show up in rss
 - open source, feel free to run your own / fork and customize
 
 ## first time setup & run dev server

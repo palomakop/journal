@@ -2,7 +2,17 @@
 
 a minimal journaling web app.
 
-you can post 1 entry per date. each entry can optionally have 1 image.
+view my instance here: [journal.palomakop.tv](https://journal.palomakop.tv)
+
+you can post 1 entry per date.
+
+features:
+- super simple (brutalist?) and mobile-friendly interface
+- full text rss feed
+- follows [html journal spec](https://journal.miso.town/)
+- posts can have images, images are optimized but you can view full size by clicking them, also you can add alt text
+- you can use markdown in posts for formatting
+- open source, feel free to run your own / fork and customize
 
 ## first time setup & run dev server
 
@@ -47,6 +57,8 @@ flask run
 
 edit config.yaml with your name and site title, and edit about.html to customize the about page. you will need to fork the repo to do that for now since those files are currently tracked in git.
 
+replace /static/default-og-image.jpg with your own preview image
+
 the username for logging in to the web app is 'admin' and the password is the one you created the hash for.
 
 ---
@@ -72,7 +84,7 @@ flask run
 
 i am running my journal instance on a raspberry pi 400 running debian/raspbian.
 
-this will vary depending on where you host it, but here are the steps i followed for my own reference:
+this will vary depending on where you host it, but here are the steps i followed:
 - burn SD card image for the lastest raspbian (using raspberry pi imager) - bookworm
 - booted up the pi plugged into ethernet
 - SSH'd in and updated packages
@@ -91,4 +103,4 @@ this will vary depending on where you host it, but here are the steps i followed
 - set up a systemctl service for gunicorn
 
 to do:
-- set up backups for image files and database. (will probably just set up a cron job on my main computer to run an "scp" command)
+- set up backups for image files and database

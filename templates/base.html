@@ -24,6 +24,12 @@
         <link rel="stylesheet" href="/static/css/style.css" />
 
         <title>{% block title %} {{ journal_title }} {% endblock %}</title>
+
+        {% if images and images|length > 0 %}
+        <meta property="og:image" content="{{ url_for('uploaded_file', filename=images[0].filename, _external=True) }}">
+        {% else %}
+        <meta property="og:image" content="{{ url_for('static', filename='default-og-image.jpg', _external=True) }}">
+        {% endif %}
     </head>
     <body>
         <div class="container">

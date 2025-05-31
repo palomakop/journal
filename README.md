@@ -101,6 +101,4 @@ this will vary depending on where you host it, but here are the steps i followed
 - created an A DNS record pointing to my home network IPv4 address (we have a static ip already)
 - activated the python virtual environment and installed gunicorn and redis
 - set up a systemctl service for gunicorn
-
-to do:
-- set up backups for image files and database
+- set up automatic backups using a launchd process on my other computer

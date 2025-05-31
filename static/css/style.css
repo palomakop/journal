@@ -156,7 +156,10 @@ form {
 }
 
 input[type=date] {
-    width:100%;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    -webkit-appearance: none;
 }
 
 input[type=checkbox] {

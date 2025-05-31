@@ -25,10 +25,18 @@
 
         <title>{% block title %} {{ journal_title }} {% endblock %}</title>
 
+        <!-- OG image -->
         {% if images and images|length > 0 %}
         <meta property="og:image" content="{{ url_for('uploaded_file', filename=images[0].filename, _external=True) }}">
         {% else %}
         <meta property="og:image" content="{{ url_for('static', filename='default-og-image.jpg', _external=True) }}">
+        {% endif %}
+
+        <!-- OG description -->
+        {% if post and post['content'] %}
+        <meta property="og:description" content="{{ post['content'] | striptags | truncate(160, true) }}">
+        {% else %}
+        <meta property="og:description" content="{{ journal_description }}">
         {% endif %}
     </head>
     <body>

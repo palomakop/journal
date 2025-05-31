@@ -67,7 +67,7 @@
         <div class="current-img">
             <img
                 class="img-thumbnail"
-                src="{{ url_for('uploaded_file', filename=image.filename) }}"
+                src="{{ url_for('optimized_file', filename='opt_' + image.filename) }}"
                 alt="{{ image.alt_text or 'Post image' }}"
             />
             <label for="existing_alt_{{ image.id }}">description</label>

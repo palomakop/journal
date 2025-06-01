@@ -6,7 +6,7 @@
     <p>page {{pagination.page}} of {{pagination.total_pages}}</p>
 </div>
 {% endif %} {% for post in posts %}
-<article>
+<article id="{{ post['post_date'] }}">
     <a href="{{ url_for('post', post_date=post['post_date']) }}"
         ><h2>{{ post['post_date'] }} - {{ post['title'] }}</h2></a
     >

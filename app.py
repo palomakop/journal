@@ -23,19 +23,12 @@ import re
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_wtf.csrf import CSRFProtect
+from pillow_heif import register_heif_opener
 
 
 # load environment variables
 load_dotenv()
 
-# add HEIC support - do this early before setting allowed extensions
-# to enable HEIC support, install: pip install pillow-heif
-try:
-    from pillow_heif import register_heif_opener
-    register_heif_opener()
-    HEIC_SUPPORTED = True
-except ImportError:
-    HEIC_SUPPORTED = False
 
 # load configs
 def load_config():
@@ -46,12 +39,18 @@ def load_config():
         print("config.yaml not found, using defaults")
         return {}
 
+
 app = Flask(__name__)
 config = load_config()
 
 
 # csrf protection
 csrf = CSRFProtect(app)
+
+
+# heif/heic support
+register_heif_opener()
+HEIC_SUPPORTED = True
 
 
 # rate limiting
@@ -92,31 +91,22 @@ def get_int_config(key, default):
     
     return default
 
+# more configs
 UPLOAD_FOLDER = config.get('upload_folder', 'uploads')
 OPTIMIZED_FOLDER = config.get('optimized_folder', 'uploads/optimized')
-
-# set default allowed extensions based on HEIC support
-default_extensions = ['png', 'jpg', 'jpeg', 'gif', 'webp']
-if HEIC_SUPPORTED:
-    default_extensions.extend(['heic', 'heif'])
-
-ALLOWED_EXTENSIONS = set(config.get('allowed_extensions', default_extensions))
-
-# if HEIC is supported, make sure heic/heif are in the final allowed extensions
-if HEIC_SUPPORTED:
-    ALLOWED_EXTENSIONS.update(['heic', 'heif'])
-
+ALLOWED_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp','heic', 'heif']
 MAX_CONTENT_LENGTH = get_int_config('max_content_length', 300 * 1024 * 1024)
 POSTS_PER_PAGE = get_int_config('posts_per_page', 15)
 OPTIMIZED_WIDTH = get_int_config('optimized_width', 1200)
-
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 
+
 # create upload directories if they don't exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(OPTIMIZED_FOLDER, exist_ok=True)
+
 
 # journal info variables for templates
 @app.context_processor
@@ -178,7 +168,7 @@ def strip_image_metadata(image_path, output_path):
             elif img.mode != 'RGB':
                 img = img.convert('RGB')
             
-            # save as JPEG without any EXIF data (works for all input formats including HEIC)
+            # save as JPEG without any EXIF data (works for all input formats)
             img.save(output_path, 'JPEG', quality=95, optimize=True, exif=b"")
             return True
     except Exception as e:
@@ -248,7 +238,7 @@ def get_post_by_id(post_id):
 
 
 def get_post_images(post_id):
-    """Get all images for a post, ordered by sort_order"""
+    """get all images for a post, ordered by sort_order"""
     conn = get_db_connection()
     images = conn.execute(
         'SELECT * FROM post_images WHERE post_id = ? ORDER BY sort_order, id',
@@ -259,10 +249,10 @@ def get_post_images(post_id):
 
 
 def process_uploaded_images(request, post_date):
-    """Process multiple uploaded images and return list of processed filenames and alt texts"""
+    """process multiple uploaded images and return list of processed filenames and alt texts"""
     processed_images = []
     
-    for i in range(1, 6):  # Handle up to 5 images
+    for i in range(1, 6):  # handle up to 5 images
         file_key = f'image_{i}'
         alt_key = f'alt_text_{i}'
         
@@ -271,19 +261,19 @@ def process_uploaded_images(request, post_date):
             alt_text = request.form.get(alt_key, '').strip() or None
             
             if file and file.filename and allowed_file(file.filename):
-                # Generate random filename with date prefix
+                # generate random filename with date prefix
                 image_filename = generate_random_filename(file.filename, post_date)
                 
-                # Save original image with metadata stripped
+                # save original image with metadata stripped
                 original_path = os.path.join(app.config['UPLOAD_FOLDER'], image_filename)
                 
-                # Save to temporary location first
+                # save to temporary location first
                 temp_path = os.path.join(tempfile.gettempdir(), f"temp_{image_filename}")
                 file.save(temp_path)
                 
-                # Strip metadata and save to final location
+                # strip metadata and save to final location
                 if strip_image_metadata(temp_path, original_path):
-                    # Create optimized version
+                    # create optimized version
                     optimized_filename = f"opt_{image_filename}"
                     optimized_path = os.path.join(OPTIMIZED_FOLDER, optimized_filename)
                     
@@ -294,12 +284,12 @@ def process_uploaded_images(request, post_date):
                     
                     processed_images.append((image_filename, alt_text, i-1))  # sort_order = i-1
                     
-                    # Clean up temp file
+                    # clean up temp file
                     if os.path.exists(temp_path):
                         os.remove(temp_path)
                 else:
                     print("failed to strip metadata from original image")
-                    # Clean up temp file
+                    # clean up temp file
                     if os.path.exists(temp_path):
                         os.remove(temp_path)
     
@@ -619,7 +609,7 @@ def edit(post_date):
                 
                 # save each new processed image
                 for filename, alt_text, sort_order in processed_images:
-                    # Adjust sort_order to come after existing images
+                    # adjust sort_order to come after existing images
                     adjusted_sort_order = len(existing_images) + sort_order
                     conn.execute(
                         'INSERT INTO post_images (post_id, filename, alt_text, sort_order) VALUES (?, ?, ?, ?)',

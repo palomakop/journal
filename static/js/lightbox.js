@@ -1,11 +1,11 @@
-// Simple Image Lightbox with Lazy Loading
+// simple image lightbox with lazy loading
 (function() {
     'use strict';
     
     let currentImages = [];
     let currentIndex = 0;
     let lightbox = null;
-    let preloadedImages = new Set(); // Track which images we've preloaded
+    let preloadedImages = new Set(); // track which images we've preloaded
 
     function createLightbox() {
         lightbox = document.createElement('div');
@@ -21,12 +21,12 @@
         `;
         document.body.appendChild(lightbox);
 
-        // Event listeners
+        // event listeners
         lightbox.querySelector('.lightbox-close').onclick = closeLightbox;
         lightbox.querySelector('.lightbox-prev').onclick = () => navigate(-1);
         lightbox.querySelector('.lightbox-next').onclick = () => navigate(1);
         
-        // Close when clicking background (lightbox or lightbox-content, but not image or buttons)
+        // close when clicking background (lightbox or lightbox-content, but not image or buttons)
         lightbox.onclick = (e) => { 
             if (e.target === lightbox || e.target.className === 'lightbox-content') {
                 closeLightbox(); 
@@ -45,7 +45,7 @@
     }
 
     function preloadImage(url) {
-        // Don't preload if we already have
+        // don't preload if we already have
         if (preloadedImages.has(url)) return;
         
         const img = new Image();
@@ -64,12 +64,12 @@
         if (!lightbox) createLightbox();
         currentImages = images;
         currentIndex = index;
-        preloadedImages.clear(); // Reset preload cache for new image set
+        preloadedImages.clear(); // reset preload cache for new image set
         updateLightbox();
         lightbox.style.display = 'block';
         document.body.style.overflow = 'hidden';
         
-        // Preload next image when lightbox opens (if there are multiple images)
+        // preload next image when lightbox opens (if there are multiple images)
         if (currentImages.length > 1) {
             const nextIndex = getNextIndex(1);
             preloadImage(currentImages[nextIndex].fullUrl);
@@ -89,7 +89,7 @@
         if (currentIndex >= currentImages.length) currentIndex = 0;
         updateLightbox();
         
-        // Preload the next image in the direction we're going
+        // preload the next image in the direction we're going
         if (currentImages.length > 1) {
             const nextIndex = getNextIndex(direction);
             preloadImage(currentImages[nextIndex].fullUrl);
@@ -103,33 +103,33 @@
         const loading = lightbox.querySelector('.lightbox-loading');
         const current = currentImages[currentIndex];
         
-        // Show loading, hide image
+        // show loading, hide image
         loading.style.display = 'block';
         img.style.display = 'none';
         
-        // Create new image to preload
+        // create new image to preload
         const newImg = new Image();
         newImg.onload = function() {
-            // Image loaded successfully
+            // image loaded successfully
             img.src = this.src;
             img.alt = current.alt;
             loading.style.display = 'none';
             img.style.display = 'block';
-            preloadedImages.add(current.fullUrl); // Mark as preloaded
+            preloadedImages.add(current.fullUrl); // mark as preloaded
         };
         newImg.onerror = function() {
-            // Image failed to load
+            // image failed to load
             loading.textContent = 'failed to load image';
             setTimeout(() => {
                 loading.style.display = 'none';
-                loading.textContent = 'loading...'; // Reset for next time
+                loading.textContent = 'loading...'; // reset for next time
             }, 2000);
         };
         
-        // Start loading the image
+        // start loading the image
         newImg.src = current.fullUrl;
         
-        // Hide nav buttons if only one image
+        // hide nav buttons if only one image
         const prevBtn = lightbox.querySelector('.lightbox-prev');
         const nextBtn = lightbox.querySelector('.lightbox-next');
         if (currentImages.length <= 1) {
@@ -142,14 +142,14 @@
     }
 
     function initializeLightbox() {
-        // Find all articles (posts)
+        // find all articles (posts)
         document.querySelectorAll('article').forEach(article => {
             const imageLinks = article.querySelectorAll('.post-image a');
             if (imageLinks.length === 0) return;
 
-            // Collect image data for this post
+            // collect image data for this post
             const images = Array.from(imageLinks).map(link => {
-                const fullUrl = link.href; // Use original href as full-size URL
+                const fullUrl = link.href; // use original href as full-size URL
                 const img = link.querySelector('img');
                 return {
                     fullUrl: fullUrl,
@@ -157,7 +157,7 @@
                 };
             });
 
-            // Add click handlers (don't modify href)
+            // add click handlers (don't modify href)
             imageLinks.forEach((link, index) => {
                 link.addEventListener('click', function(e) {
                     e.preventDefault();
@@ -166,12 +166,12 @@
             });
         });
 
-        // Handle single post page (if no articles, look for post-images directly)
+        // handle single post page (if no articles, look for post-images directly)
         if (document.querySelectorAll('article').length === 0) {
             const imageLinks = document.querySelectorAll('.post-image a');
             if (imageLinks.length > 0) {
                 const images = Array.from(imageLinks).map(link => {
-                    const fullUrl = link.href; // Use original href as full-size URL
+                    const fullUrl = link.href; // use original href as full-size URL
                     const img = link.querySelector('img');
                     return {
                         fullUrl: fullUrl,
@@ -189,7 +189,7 @@
         }
     }
 
-    // Initialize when DOM is ready
+    // initialize when DOM is ready
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initializeLightbox);
     } else {

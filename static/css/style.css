@@ -1,7 +1,7 @@
 html {
     height: 100%;
     padding: env(safe-area-inset); /* for iphone notch */
-    /* Prevent font scaling in landscape while allowing user zoom */
+    /* prevent font scaling in landscape while allowing user zoom */
     text-size-adjust: var(--text-size-adjust);
     -webkit-text-size-adjust: var(--text-size-adjust);
     -moz-text-size-adjust: var(--text-size-adjust);
@@ -215,8 +215,8 @@ form details > summary {
     list-style: none;
 }
 
-form details > summary::marker, /* Latest Chrome, Edge, Firefox */ 
-form details > summary::-webkit-details-marker /* Safari */ {
+form details > summary::marker, /* latest Chrome, Edge, Firefox */ 
+form details > summary::-webkit-details-marker /* safari */ {
     display: none;
 }
 

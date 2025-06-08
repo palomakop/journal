@@ -27,9 +27,9 @@
 
         <!-- OG image -->
         {% if images and images|length > 0 %}
-        <meta property="og:image" content="{{ url_for('uploaded_file', filename=images[0].filename) }}">
+        <meta property="og:image" content="{{ url_for('uploaded_file', filename=images[0].filename, _external=True, _scheme='https') }}">
         {% else %}
-        <meta property="og:image" content="{{ url_for('static', filename='default-og-image.jpg') }}">
+        <meta property="og:image" content="{{ url_for('static', filename='default-og-image.jpg', _external=True, _scheme='https') }}">
         {% endif %}
 
         <!-- OG description -->

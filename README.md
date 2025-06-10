@@ -56,7 +56,7 @@ export FLASK_DEBUG=1
 flask run
 ```
 
-edit config.yaml with your name and site title, and edit about.html to customize the about page. you will need to fork the repo to do that for now since those files are currently tracked in git.
+create a `config.yaml` file (copy from `config_example.yaml`), and edit about.html to customize the about page. (you will need to fork the repo to edit the about page template as it's tracked in git.)
 
 replace /static/default-og-image.jpg with your own preview image
 

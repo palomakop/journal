@@ -45,6 +45,17 @@
     </div>
 
     <div class="form-group">
+        <div class="form-check">
+            <input type="checkbox" name="cross_post_mastodon" id="cross_post_mastodon"
+            class="form-check-input" {% if request.form.get('cross_post_mastodon')
+            %}checked{% endif %}>
+            <label for="cross_post_mastodon" class="form-check-label">
+                <strong>cross-post to mastodon?</strong>
+            </label>
+        </div>
+    </div>
+
+    <div class="form-group">
         <label for="content">post content</label>
         <textarea
             name="content"

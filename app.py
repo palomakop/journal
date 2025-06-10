@@ -24,6 +24,7 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_wtf.csrf import CSRFProtect
 from pillow_heif import register_heif_opener
+from mastodon import Mastodon
 
 
 # load environment variables
@@ -307,6 +308,42 @@ def login_required(f):
     return decorated_function
 
 
+def post_to_mastodon(post_date, title, post_url):
+    """post to mastodon if configured"""
+    try:
+        mastodon_config = config.get('mastodon', {})
+        instance_url = mastodon_config.get('instance_url')
+        access_token = mastodon_config.get('access_token')
+        privacy = mastodon_config.get('privacy', 'private')
+        
+        if not instance_url or not access_token:
+            flash('mastodon not configured - skipping cross-post')
+            return False
+            
+        # create mastodon client
+        mastodon = Mastodon(
+            access_token=access_token,
+            api_base_url=instance_url
+        )
+        
+        # format post content
+        iso_date = datetime.strptime(post_date, '%Y-%m-%d').strftime('%Y-%m-%d')
+        status_text = f"{iso_date} - {title}\n\nhttps://journal.palomakop.tv/post/{post_date}"
+        
+        # post to mastodon
+        mastodon.status_post(
+            status=status_text,
+            visibility=privacy
+        )
+        
+        flash('successfully cross-posted to mastodon!')
+        return True
+        
+    except Exception as e:
+        flash(f'error posting to mastodon: {str(e)}')
+        return False
+
+
 # configure markdown
 md = markdown.Markdown(extensions=['fenced_code', 'tables', 'toc'])
 
@@ -546,6 +583,12 @@ def create():
                 
                 conn.commit()
                 flash('post created successfully!')
+                
+                # handle mastodon cross-posting
+                if 'cross_post_mastodon' in request.form:
+                    post_url = f"https://journal.palomakop.tv/post/{post_date}"
+                    post_to_mastodon(post_date, title, post_url)
+                
                 return redirect(url_for('post', post_date=post_date))
                 
             except sqlite3.IntegrityError:
@@ -624,6 +667,12 @@ def edit(post_date):
                 
                 conn.commit()
                 flash('post updated successfully!')
+                
+                # handle mastodon cross-posting
+                if 'cross_post_mastodon' in request.form:
+                    post_url = f"https://journal.palomakop.tv/post/{new_post_date}"
+                    post_to_mastodon(new_post_date, title, post_url)
+                
                 return redirect(url_for('post', post_date=new_post_date))
                 
             except sqlite3.IntegrityError:

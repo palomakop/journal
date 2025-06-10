@@ -5,3 +5,4 @@ database.db
 .DS_Store
 .env
 database_backup.db
+config.yaml

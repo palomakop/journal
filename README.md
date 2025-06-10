@@ -14,6 +14,7 @@ features:
 - you can use markdown in posts for formatting
 - posts can be private or public. private posts can only be seen by the user. they also don't show up in rss
 - open source, feel free to run your own / fork and customize
+- cross posting to mastodon - optional for each post
 
 ## first time setup & run dev server
 
@@ -61,6 +62,8 @@ create a `config.yaml` file (copy from `config_example.yaml`), and edit about.ht
 replace /static/default-og-image.jpg with your own preview image
 
 the username for logging in to the web app is 'admin' and the password is the one you created the hash for.
+
+if you want to be able to cross post to mastodon, you need to [get an oauth access token](https://docs.joinmastodon.org/client/token/#auth) and add it to config.yaml
 
 ---
 

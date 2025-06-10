@@ -328,7 +328,7 @@ def post_to_mastodon(post_date, title, post_url):
         
         # format post content
         iso_date = datetime.strptime(post_date, '%Y-%m-%d').strftime('%Y-%m-%d')
-        status_text = f"{iso_date} - {title}\n\nhttps://journal.palomakop.tv/post/{post_date}"
+        status_text = f"new journal entry...\n\n{iso_date} - {title}\n\nhttps://journal.palomakop.tv/post/{post_date}"
         
         # post to mastodon
         mastodon.status_post(

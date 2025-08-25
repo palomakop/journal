@@ -45,6 +45,10 @@ app = Flask(__name__)
 config = load_config()
 
 
+# Session configuration - expires after 1 week
+app.permanent_session_lifetime = timedelta(weeks=1)
+
+
 # csrf protection
 csrf = CSRFProtect(app)
 
@@ -528,6 +532,7 @@ def login():
             password_valid = check_password_hash(admin_password_hash, password)
         
         if password_valid:
+            session.permanent = True
             session['logged_in'] = True
             session['username'] = 'admin'
             flash('successfully logged in!')

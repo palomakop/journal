@@ -49,4 +49,22 @@
         >back to posts</a
     >
 </div>
-{% endif %} {% endblock %}
+
+{% endif %}
+
+<script>
+// Clear draft data when viewing a post (after successful create/edit)
+document.addEventListener('DOMContentLoaded', function() {
+    const postDate = '{{ post.post_date }}';
+    const keys = Object.keys(localStorage);
+    
+    keys.forEach(key => {
+        // Clear both create and edit drafts
+        if (key.startsWith('create_draft_') || key.startsWith('edit_draft_' + postDate + '_')) {
+            localStorage.removeItem(key);
+        }
+    });
+});
+</script>
+
+{% endblock %}

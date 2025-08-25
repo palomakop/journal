@@ -102,4 +102,34 @@
     <button type="submit" class="btn btn-primary">create post</button>
 </form>
 
+<script>
+// Auto-save form data as user types
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const inputs = form.querySelectorAll('input[type="text"], textarea, input[type="date"]');
+    
+    // Load saved data on page load
+    inputs.forEach(input => {
+        const saved = localStorage.getItem('create_draft_' + input.name);
+        if (saved && !input.value) {
+            input.value = saved;
+        }
+    });
+    
+    // Save data as user types
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            localStorage.setItem('create_draft_' + input.name, input.value);
+        });
+    });
+    
+    // Clear saved data when form is successfully submitted
+    form.addEventListener('submit', function() {
+        inputs.forEach(input => {
+            localStorage.removeItem('create_draft_' + input.name);
+        });
+    });
+});
+</script>
+
 {% endblock %}

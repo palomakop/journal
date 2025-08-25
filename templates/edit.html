@@ -149,4 +149,35 @@
     />
 </form>
 
+<script>
+// Auto-save form data as user types
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const inputs = form.querySelectorAll('input[type="text"], textarea, input[type="date"]');
+    const postDate = '{{ post.post_date }}'; // Get current post date for unique keys
+    
+    // Load saved data on page load
+    inputs.forEach(input => {
+        const saved = localStorage.getItem('edit_draft_' + postDate + '_' + input.name);
+        if (saved) {
+            input.value = saved;
+        }
+    });
+    
+    // Save data as user types
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            localStorage.setItem('edit_draft_' + postDate + '_' + input.name, input.value);
+        });
+    });
+    
+    // Clear saved data when form is successfully submitted
+    form.addEventListener('submit', function() {
+        inputs.forEach(input => {
+            localStorage.removeItem('edit_draft_' + postDate + '_' + input.name);
+        });
+    });
+});
+</script>
+
 {% endblock %}

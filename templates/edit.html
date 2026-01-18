@@ -2,7 +2,6 @@
 <h1>{% block title %} edit "{{ post['title'] }}" {% endblock %}</h1>
 
 <form method="post" enctype="multipart/form-data">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
     <div class="form-group">
         <label for="post_date">post date</label>
         <input
@@ -140,7 +139,6 @@
     action="{{ url_for('delete', post_date=post['post_date']) }}"
     method="POST"
 >
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
     <input
         type="submit"
         value="delete post"

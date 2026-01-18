@@ -104,5 +104,5 @@ this will vary depending on where you host it, but here are the steps i followed
 - set up port forwarding on my router to forward 80 and 443 to my pi
 - created an A DNS record pointing to my home network IPv4 address (we have a static ip already)
 - activated the python virtual environment and installed gunicorn and redis
-- set up a systemctl service for gunicorn
+- set up a systemctl service for gunicorn, and a systemctl service for the flask app
 - set up automatic backups using a launchd process on my other computer

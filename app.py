@@ -50,7 +50,7 @@ app.permanent_session_lifetime = timedelta(weeks=1)
 
 
 # csrf protection
-csrf = CSRFProtect(app)
+# csrf = CSRFProtect(app)
 
 
 # heif/heic support

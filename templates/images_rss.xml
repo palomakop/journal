@@ -14,7 +14,7 @@
         <item>
             <title>{{ image.post_date }}_{{ '%03d' % image.index }}</title>
             <description><![CDATA[<img class="webring" src="{{ request.url_root }}uploads/webring_small/{{ image.filename }}" data-timestamp="{{ datetime.strptime(image.created, '%Y-%m-%d %H:%M:%S').timestamp() | int }}" data-thumb="{{ request.url_root }}uploads/webring_tiny/{{ image.filename }}"><p>from <a href="{{ request.url_root }}post/{{ image.post_date }}">{{ image.title }}</a></p>]]></description>
-            <link>{{ request.url_root }}uploads/{{ image.filename }}</link>
+            <link>{{ request.url_root }}post/{{ image.post_date }}</link>
             <guid isPermaLink="false">{{ image.post_date }}_{{ '%03d' % image.index }}</guid>
             <pubDate>{{ datetime.strptime(image.created, '%Y-%m-%d %H:%M:%S').strftime('%a, %d %b %Y %H:%M:%S +0000') }}</pubDate>
         </item>

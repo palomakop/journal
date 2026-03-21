@@ -13,7 +13,7 @@ from flask import Flask, render_template, request, url_for, flash, redirect, ses
 from werkzeug.exceptions import abort
 from markupsafe import Markup
 from dotenv import load_dotenv
-from PIL import Image
+from PIL import Image, ImageOps
 from PIL.ExifTags import TAGS
 import math
 import json
@@ -160,6 +160,7 @@ def strip_image_metadata(image_path, output_path):
     """
     try:
         with Image.open(image_path) as img:
+            img = ImageOps.exif_transpose(img)  # apply EXIF rotation before anything else
             # convert to RGB for consistency and web compatibility
             # this handles HEIC, PNG with transparency, etc.
             if img.mode in ('RGBA', 'LA', 'P'):
@@ -188,6 +189,7 @@ def optimize_image(input_path, output_path, max_width=OPTIMIZED_WIDTH):
     """
     try:
         with Image.open(input_path) as img:
+            img = ImageOps.exif_transpose(img)  # apply EXIF rotation before anything else
             # convert to RGB if necessary (for JPEGs)
             if img.mode in ('RGBA', 'LA', 'P'):
                 # convert palette or transparency to RGB

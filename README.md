@@ -15,6 +15,7 @@ features:
 - posts can be private or public. private posts can only be seen by the user. they also don't show up in rss
 - open source, feel free to run your own / fork and customize
 - cross posting to mastodon - optional for each post
+- image gallery page and images rss feed for [subversive.pics webring](https://codeberg.org/rostiger/subversive.pics_webring/src/branch/main)
 
 ## first time setup & run dev server
 
@@ -106,3 +107,5 @@ this will vary depending on where you host it, but here are the steps i followed
 - activated the python virtual environment and installed gunicorn and redis
 - set up a systemctl service for gunicorn, and a systemctl service for the flask app
 - set up automatic backups using a launchd process on my other computer
+
+note: i changed ISPs and don't have a static IP address anymore, so i'm using a more complex reverse-proxy setup now, but the principles are the same. also, i had to increase the max request size in my nginx configs to allow for image uploads.

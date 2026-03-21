@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>{{ journal_title }} - images</title>
+        <description>recent images from {{ journal_title }}</description>
+        <link>{{ request.url_root }}images</link>
+        <atom:link href="{{ request.url }}" rel="self" type="application/rss+xml"/>
+        <language>en-us</language>
+        {% if images %}
+        <lastBuildDate>{{ datetime.strptime(images[0]['created'], '%Y-%m-%d %H:%M:%S').strftime('%a, %d %b %Y %H:%M:%S +0000') }}</lastBuildDate>
+        {% endif %}
+
+        {% for image in images %}
+        <item>
+            <title>{{ image.post_date }}_{{ '%03d' % image.index }}</title>
+            <description><![CDATA[<img class="webring" src="{{ request.url_root }}uploads/webring_small/{{ image.filename }}" data-timestamp="{{ datetime.strptime(image.created, '%Y-%m-%d %H:%M:%S').timestamp() | int }}" data-thumb="{{ request.url_root }}uploads/webring_tiny/{{ image.filename }}"><p>from <a href="{{ request.url_root }}post/{{ image.post_date }}">{{ image.title }}</a></p>]]></description>
+            <link>{{ request.url_root }}uploads/{{ image.filename }}</link>
+            <guid isPermaLink="false">{{ image.post_date }}_{{ '%03d' % image.index }}</guid>
+            <pubDate>{{ datetime.strptime(image.created, '%Y-%m-%d %H:%M:%S').strftime('%a, %d %b %Y %H:%M:%S +0000') }}</pubDate>
+        </item>
+        {% endfor %}
+    </channel>
+</rss>

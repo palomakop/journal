@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}images - {{ journal_title }}{% endblock %}
+
+{% block content %}
+<h1>images</h1>
+
+<p><a href="https://img.triapul.cz/sect.html" target="_blank">webring</a></p>
+
+{% if pagination.total > 0 %}
+<div class="page-info">
+    <p>page {{ pagination.page }} of {{ pagination.total_pages }}</p>
+</div>
+
+<div class="image-grid">
+    {% for image in images %}
+    <div class="image-grid-item"
+         data-full-url="{{ url_for('webring_small_file', filename=image.filename) }}"
+         data-alt="{{ image.alt_text or 'Image from ' + image.post_date }}"
+         data-post-url="{{ url_for('post', post_date=image.post_date) }}">
+        <img
+            src="{{ url_for('webring_small_file', filename=image.filename) }}"
+            alt="{{ image.alt_text or 'Image from ' + image.post_date }}"
+            loading="lazy"
+        />
+    </div>
+    {% endfor %}
+</div>
+
+<!-- pagination -->
+{% if pagination.total_pages > 1 %}
+<nav class="pagination-nav" aria-label="images pagination">
+    <ul class="pagination">
+        {% if pagination.has_prev %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('images_gallery', page=1) }}">&lt;&lt;</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('images_gallery', page=pagination.prev_num) }}">&lt;</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled"><span class="page-link">&lt;&lt;</span></li>
+        <li class="page-item disabled"><span class="page-link">&lt;</span></li>
+        {% endif %}
+
+        <li class="page-item active">
+            <span class="page-link">{{ pagination.page }}</span>
+        </li>
+
+        {% if pagination.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('images_gallery', page=pagination.next_num) }}">&gt;</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('images_gallery', page=pagination.total_pages) }}">&gt;&gt;</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled"><span class="page-link">&gt;</span></li>
+        <li class="page-item disabled"><span class="page-link">&gt;&gt;</span></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<div class="no-posts">
+    <p>no images to display.</p>
+</div>
+{% endif %}
+
+<script>
+// initialize lightbox for image grid
+(function() {
+    const gridItems = document.querySelectorAll('.image-grid-item');
+
+    // collect all images for lightbox navigation
+    const images = Array.from(gridItems).map(item => ({
+        fullUrl: item.dataset.fullUrl,
+        alt: item.dataset.alt
+    }));
+
+    // add click handlers
+    gridItems.forEach((item, index) => {
+        item.addEventListener('click', function() {
+            if (window.openImageLightbox) {
+                openImageLightbox(images, index);
+            }
+        });
+    });
+})();
+</script>
+
+{% endblock %}

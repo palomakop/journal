@@ -6,6 +6,11 @@ optimized_folder: 'uploads/optimized'
 max_content_length: 300000000
 posts_per_page: 15
 optimized_width: 1200 # optimized images will be x pixels wide
+webring_small_folder: 'uploads/webring_small'
+webring_tiny_folder: 'uploads/webring_tiny'
+webring_small_width: 960
+webring_tiny_width: 256
+images_per_page: 30
 
 # mastodon configuration
 mastodon:

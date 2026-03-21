@@ -44,6 +44,7 @@
             <header>
                 <div class="nav-left">
                     <a href="{{ url_for('index') }}">{{ journal_title }}</a>
+                    <a href="{{ url_for('images_gallery') }}">images</a>
                     <a href="{{ url_for('about') }}">about</a>
                     {% if session.logged_in %}
                     <a href="{{ url_for('create') }}">new post</a>

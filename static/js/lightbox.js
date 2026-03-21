@@ -189,6 +189,9 @@
         }
     }
 
+    // Expose openLightbox globally for image grid page
+    window.openImageLightbox = openLightbox;
+
     // initialize when DOM is ready
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initializeLightbox);

@@ -103,6 +103,11 @@ ALLOWED_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp','heic', 'heif']
 MAX_CONTENT_LENGTH = get_int_config('max_content_length', 300 * 1024 * 1024)
 POSTS_PER_PAGE = get_int_config('posts_per_page', 15)
 OPTIMIZED_WIDTH = get_int_config('optimized_width', 1200)
+WEBRING_SMALL_FOLDER = config.get('webring_small_folder', 'uploads/webring_small')
+WEBRING_TINY_FOLDER = config.get('webring_tiny_folder', 'uploads/webring_tiny')
+WEBRING_SMALL_WIDTH = get_int_config('webring_small_width', 960)
+WEBRING_TINY_WIDTH = get_int_config('webring_tiny_width', 256)
+IMAGES_PER_PAGE = get_int_config('images_per_page', 30)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
@@ -111,6 +116,8 @@ app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 # create upload directories if they don't exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(OPTIMIZED_FOLDER, exist_ok=True)
+os.makedirs(WEBRING_SMALL_FOLDER, exist_ok=True)
+os.makedirs(WEBRING_TINY_FOLDER, exist_ok=True)
 
 
 # journal info variables for templates
@@ -218,6 +225,38 @@ def optimize_image(input_path, output_path, max_width=OPTIMIZED_WIDTH):
         return False
 
 
+def create_all_image_versions(temp_path, base_filename):
+    """
+    create all required image versions from temporary upload.
+    returns dict with success status for each version.
+    """
+    results = {
+        'original': False,
+        'opt_1200': False,
+        'webring_small': False,
+        'webring_tiny': False
+    }
+
+    # original (metadata stripped)
+    original_path = os.path.join(UPLOAD_FOLDER, base_filename)
+    results['original'] = strip_image_metadata(temp_path, original_path)
+
+    # 1200px optimized
+    optimized_filename = f"opt_{base_filename}"
+    optimized_path = os.path.join(OPTIMIZED_FOLDER, optimized_filename)
+    results['opt_1200'] = optimize_image(temp_path, optimized_path, OPTIMIZED_WIDTH)
+
+    # webring small version
+    webring_small_path = os.path.join(WEBRING_SMALL_FOLDER, base_filename)
+    results['webring_small'] = optimize_image(temp_path, webring_small_path, WEBRING_SMALL_WIDTH)
+
+    # webring tiny thumbnail
+    webring_tiny_path = os.path.join(WEBRING_TINY_FOLDER, base_filename)
+    results['webring_tiny'] = optimize_image(temp_path, webring_tiny_path, WEBRING_TINY_WIDTH)
+
+    return results
+
+
 def get_db_connection():
     conn = sqlite3.connect('database.db')
     conn.row_factory = sqlite3.Row
@@ -278,25 +317,16 @@ def process_uploaded_images(request, post_date):
                 temp_path = os.path.join(tempfile.gettempdir(), f"temp_{image_filename}")
                 file.save(temp_path)
                 
-                # strip metadata and save to final location
-                if strip_image_metadata(temp_path, original_path):
-                    # create optimized version
-                    optimized_filename = f"opt_{image_filename}"
-                    optimized_path = os.path.join(OPTIMIZED_FOLDER, optimized_filename)
-                    
-                    if optimize_image(temp_path, optimized_path):
-                        print(f"created optimized image: {optimized_filename}")
-                    else:
-                        print("failed to create optimized image, using original")
-                    
+                # create all image versions
+                results = create_all_image_versions(temp_path, image_filename)
+
+                if results['original']:
+                    print(f"created versions for {image_filename}: 1200={results['opt_1200']}, small={results['webring_small']}, tiny={results['webring_tiny']}")
                     processed_images.append((image_filename, alt_text, i-1))  # sort_order = i-1
-                    
-                    # clean up temp file
                     if os.path.exists(temp_path):
                         os.remove(temp_path)
                 else:
-                    print("failed to strip metadata from original image")
-                    # clean up temp file
+                    print(f"failed to create image versions for {image_filename}")
                     if os.path.exists(temp_path):
                         os.remove(temp_path)
     
@@ -416,6 +446,24 @@ def optimized_file(filename):
     return send_from_directory(os.path.join(os.path.dirname(__file__), UPLOAD_FOLDER, 'optimized'), filename)
 
 
+@app.route('/uploads/webring_small/<filename>')
+def webring_small_file(filename):
+    """serve webring small versions"""
+    return send_from_directory(
+        os.path.join(os.path.dirname(__file__), WEBRING_SMALL_FOLDER),
+        filename
+    )
+
+
+@app.route('/uploads/webring_tiny/<filename>')
+def webring_tiny_file(filename):
+    """serve webring tiny thumbnail versions"""
+    return send_from_directory(
+        os.path.join(os.path.dirname(__file__), WEBRING_TINY_FOLDER),
+        filename
+    )
+
+
 @app.route('/about')
 def about():
     return render_template('about.html')
@@ -449,6 +497,101 @@ def rss_feed():
     conn.close()
     
     response = render_template('rss.xml', posts=posts_with_images, datetime=datetime)
+    return app.response_class(response, mimetype='application/rss+xml')
+
+
+@app.route('/images')
+def images_gallery():
+    """display all public images in grid with pagination"""
+    page = request.args.get('page', 1, type=int)
+
+    conn = get_db_connection()
+
+    # count total public images
+    total_query = '''
+        SELECT COUNT(*)
+        FROM post_images pi
+        INNER JOIN posts p ON pi.post_id = p.id
+        WHERE p.is_private = 0
+    '''
+    total = conn.execute(total_query).fetchone()[0]
+
+    # calculate pagination
+    total_pages = math.ceil(total / IMAGES_PER_PAGE)
+    offset = (page - 1) * IMAGES_PER_PAGE
+
+    # get images with post data
+    images_query = '''
+        SELECT
+            pi.id,
+            pi.filename,
+            pi.alt_text,
+            pi.created,
+            p.post_date,
+            p.id as post_id
+        FROM post_images pi
+        INNER JOIN posts p ON pi.post_id = p.id
+        WHERE p.is_private = 0
+        ORDER BY pi.created DESC
+        LIMIT ? OFFSET ?
+    '''
+    images = conn.execute(images_query, (IMAGES_PER_PAGE, offset)).fetchall()
+    conn.close()
+
+    pagination = {
+        'page': page,
+        'total_pages': total_pages,
+        'has_prev': page > 1,
+        'has_next': page < total_pages,
+        'prev_num': page - 1 if page > 1 else None,
+        'next_num': page + 1 if page < total_pages else None,
+        'total': total
+    }
+
+    return render_template('images.html', images=images, pagination=pagination)
+
+
+@app.route('/images.xml')
+def images_rss():
+    """generate webring-spec RSS feed with last 50 images from public posts"""
+    conn = get_db_connection()
+
+    # get last 50 images from public posts
+    images_query = '''
+        SELECT
+            pi.id,
+            pi.filename,
+            pi.alt_text,
+            pi.created,
+            pi.sort_order,
+            p.post_date,
+            p.title,
+            p.id as post_id
+        FROM post_images pi
+        INNER JOIN posts p ON pi.post_id = p.id
+        WHERE p.is_private = 0
+        ORDER BY p.post_date DESC, pi.sort_order ASC
+        LIMIT 50
+    '''
+    images = conn.execute(images_query).fetchall()
+
+    # calculate index per post_date for titles
+    images_with_indices = []
+    date_counters = {}
+
+    for img in images:
+        post_date = img['post_date']
+        if post_date not in date_counters:
+            date_counters[post_date] = 0
+        date_counters[post_date] += 1
+
+        img_dict = dict(img)
+        img_dict['index'] = date_counters[post_date]
+        images_with_indices.append(img_dict)
+
+    conn.close()
+
+    response = render_template('images_rss.xml', images=images_with_indices, datetime=datetime, request=request)
     return app.response_class(response, mimetype='application/rss+xml')
 
 
@@ -636,13 +779,15 @@ def edit(post_date):
                     if f'remove_image_{image["id"]}' in request.form:
                         # delete files
                         if image['filename']:
-                            original_path = os.path.join(app.config['UPLOAD_FOLDER'], image['filename'])
-                            optimized_path = os.path.join(OPTIMIZED_FOLDER, f"opt_{image['filename']}")
-                            
-                            if os.path.exists(original_path):
-                                os.remove(original_path)
-                            if os.path.exists(optimized_path):
-                                os.remove(optimized_path)
+                            paths_to_delete = [
+                                os.path.join(app.config['UPLOAD_FOLDER'], image['filename']),
+                                os.path.join(OPTIMIZED_FOLDER, f"opt_{image['filename']}"),
+                                os.path.join(WEBRING_SMALL_FOLDER, image['filename']),
+                                os.path.join(WEBRING_TINY_FOLDER, image['filename'])
+                            ]
+                            for path in paths_to_delete:
+                                if os.path.exists(path):
+                                    os.remove(path)
                         
                         # delete database record
                         conn.execute('DELETE FROM post_images WHERE id = ?', (image['id'],))
@@ -704,13 +849,15 @@ def delete(post_date):
     # delete all associated image files
     for image in images:
         if image['filename']:
-            original_path = os.path.join(app.config['UPLOAD_FOLDER'], image['filename'])
-            optimized_path = os.path.join(OPTIMIZED_FOLDER, f"opt_{image['filename']}")
-            
-            if os.path.exists(original_path):
-                os.remove(original_path)
-            if os.path.exists(optimized_path):
-                os.remove(optimized_path)
+            paths_to_delete = [
+                os.path.join(app.config['UPLOAD_FOLDER'], image['filename']),
+                os.path.join(OPTIMIZED_FOLDER, f"opt_{image['filename']}"),
+                os.path.join(WEBRING_SMALL_FOLDER, image['filename']),
+                os.path.join(WEBRING_TINY_FOLDER, image['filename'])
+            ]
+            for path in paths_to_delete:
+                if os.path.exists(path):
+                    os.remove(path)
     
     conn = get_db_connection()
     # delete post (images will be deleted automatically due to CASCADE)

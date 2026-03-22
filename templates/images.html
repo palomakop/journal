@@ -14,15 +14,18 @@
 
 <div class="image-grid">
     {% for image in images %}
-    <div class="image-grid-item"
-         data-full-url="{{ url_for('webring_small_file', filename=image.filename) }}"
-         data-alt="{{ image.alt_text or 'Image from ' + image.post_date }}"
-         data-post-url="{{ url_for('post', post_date=image.post_date) }}">
-        <img
-            src="{{ url_for('webring_small_file', filename=image.filename) }}"
-            alt="{{ image.alt_text or 'Image from ' + image.post_date }}"
-            loading="lazy"
-        />
+    <div class="image-grid-item">
+        <a
+            href="{{ url_for('uploaded_file', filename=image.filename) }}"
+            target="_blank"
+            title="click to view full resolution"
+        >
+            <img
+                src="{{ url_for('webring_small_file', filename=image.filename) }}"
+                alt="{{ image.alt_text or 'Image from ' + image.post_date }}"
+                loading="lazy"
+            />
+        </a>
     </div>
     {% endfor %}
 </div>
@@ -74,18 +77,26 @@
     const gridItems = document.querySelectorAll('.image-grid-item');
 
     // collect all images for lightbox navigation
-    const images = Array.from(gridItems).map(item => ({
-        fullUrl: item.dataset.fullUrl,
-        alt: item.dataset.alt
-    }));
+    const images = Array.from(gridItems).map(item => {
+        const link = item.querySelector('a');
+        const img = item.querySelector('img');
+        return {
+            fullUrl: link ? link.href : '',
+            alt: img ? img.alt : ''
+        };
+    });
 
-    // add click handlers
+    // add click handlers to links
     gridItems.forEach((item, index) => {
-        item.addEventListener('click', function() {
-            if (window.openImageLightbox) {
-                openImageLightbox(images, index);
-            }
-        });
+        const link = item.querySelector('a');
+        if (link) {
+            link.addEventListener('click', function(e) {
+                if (window.openImageLightbox) {
+                    e.preventDefault();
+                    openImageLightbox(images, index);
+                }
+            });
+        }
     });
 })();
 </script>

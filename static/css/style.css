@@ -27,7 +27,7 @@ header {
 }
 
 header .nav-right {
-    text-align:right;
+    text-align: right;
 }
 
 h1 {
@@ -88,12 +88,12 @@ header a,
     border-radius: 0.5em;
     font-size: 1rem;
     font-family: sans-serif;
-    display:inline-block;
+    display: inline-block;
 }
 
 input::file-selector-button, button.btn, input[type=submit] {
-    padding:0.3em 0.5em;
-    cursor:pointer;
+    padding: 0.3em 0.5em;
+    cursor: pointer;
 }
 
 header a:hover,
@@ -163,52 +163,52 @@ input[type=date] {
 }
 
 input[type=checkbox] {
-    width:1.2em;
-    height:1.2em;
+    width: 1.2em;
+    height: 1.2em;
 }
 
 form small {
-    display:block;
-    margin-top:0.3em;
+    display: block;
+    margin-top: 0.3em;
 }
 
 form input::file-selector-button {
-    text-transform:lowercase;
-    background-color:antiquewhite;
-    margin-right:1ch;
-    cursor:pointer;
+    text-transform: lowercase;
+    background-color: antiquewhite;
+    margin-right: 1ch;
+    cursor: pointer;
 }
 
 form input::file-selector-button:hover {
-    color:antiquewhite;
-    background-color:black;
+    color: antiquewhite;
+    background-color: black;
 }
 
 form .new-img, form .current-img {
-    display:flex;
-    flex-direction:column;
+    display: flex;
+    flex-direction: column;
 }
 
 form .current-img {
-    margin-top:1.3em;
+    margin-top: 1.3em;
 }
 
 form .new-img h3 {
-    margin:1em 0 0.3em;
+    margin: 1em 0 0.3em;
 }
 
 form .remove-img {
-    margin-top:0.3em;
+    margin-top: 0.3em;
 }
 
 input[type=file] {
-    margin-bottom:0.3em;
+    margin-bottom: 0.3em;
 }
 
 form .img-thumbnail {
-    width:300px;
-    max-width:100%;
-    margin-bottom:0.3em;
+    width: 300px;
+    max-width: 100%;
+    margin-bottom: 0.3em;
 }
 
 form details > summary {
@@ -221,17 +221,17 @@ form details > summary::-webkit-details-marker /* safari */ {
 }
 
 form details > summary h2 {
-    cursor:pointer;
+    cursor: pointer;
 }
 
 form details > summary h2::before {
-    content:'(+)';
+    content: '(+)';
     padding-right:0.5ch;
     opacity:0.5;
 }
 
 form details[open] > summary h2::before {
-    content:'(−)';
+    content: '(−)';
 }
 
 /* IMAGES */
@@ -249,7 +249,8 @@ form details[open] > summary h2::before {
     object-fit: contain;
     border: 1.5px solid black;
     box-shadow: 0.6rem 0.6rem 0 rgba(0, 0, 0, 0.2);
-    box-sizing:border-box;
+    box-sizing: border-box;
+    cursor: pointer;
 }
 
 .post-content img {
@@ -291,12 +292,6 @@ form details[open] > summary h2::before {
     border: 1.5px solid black;
     box-shadow: 0.3rem 0.3rem 0 rgba(0, 0, 0, 0.2);
     cursor: pointer;
-    transition: transform 0.2s ease;
-}
-
-.image-grid-item:hover {
-    transform: scale(1.05);
-    box-shadow: 0.6rem 0.6rem 0 rgba(0, 0, 0, 0.3);
 }
 
 .image-grid-item img {
@@ -343,14 +338,14 @@ form details[open] > summary h2::before {
 
 .lightbox-close, .lightbox-nav {
     position: absolute;
-    opacity:0.6;
+    opacity: 0.6;
     border-radius: 2rem;
     cursor: pointer;
     padding: 0.1rem 0.8rem 0.3rem;
     font-size:1.5rem;
-    color:antiquewhite;
-    background:rgba(0, 0, 0, 0.5);
-    border:1.5px solid rgb(250, 235, 215, 0.5);
+    color: antiquewhite;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1.5px solid rgb(250, 235, 215, 0.5);
 }
 
 .lightbox-close {

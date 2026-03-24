@@ -52,19 +52,37 @@
 
 {% endif %}
 
+{% if session.logged_in %}
 <script>
-// Clear draft data when viewing a post (after successful create/edit)
+// clear draft data only when redirected here after successful create/edit
 document.addEventListener('DOMContentLoaded', function() {
     const postDate = '{{ post.post_date }}';
-    const keys = Object.keys(localStorage);
-    
-    keys.forEach(key => {
-        // Clear both create and edit drafts
-        if (key.startsWith('create_draft_') || key.startsWith('edit_draft_' + postDate + '_')) {
-            localStorage.removeItem(key);
-        }
-    });
+
+    // check if we just submitted the create form
+    if (sessionStorage.getItem('create_form_submitted') === 'true') {
+        sessionStorage.removeItem('create_form_submitted');
+        // clear create draft only
+        const keys = Object.keys(localStorage);
+        keys.forEach(key => {
+            if (key.startsWith('create_draft_')) {
+                localStorage.removeItem(key);
+            }
+        });
+    }
+
+    // check if we just submitted an edit form for this post
+    if (sessionStorage.getItem('edit_form_submitted_' + postDate) === 'true') {
+        sessionStorage.removeItem('edit_form_submitted_' + postDate);
+        // clear edit draft only for this post
+        const keys = Object.keys(localStorage);
+        keys.forEach(key => {
+            if (key.startsWith('edit_draft_' + postDate + '_')) {
+                localStorage.removeItem(key);
+            }
+        });
+    }
 });
 </script>
+{% endif %}
 
 {% endblock %}

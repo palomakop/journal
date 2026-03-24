@@ -102,31 +102,32 @@
 </form>
 
 <script>
-// Auto-save form data as user types
+// auto-save form data as user types
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.querySelector('form');
     const inputs = form.querySelectorAll('input[type="text"], textarea, input[type="date"]');
-    
-    // Load saved data on page load
+
+    // clear the submission flag if we're back on create page (means submission failed)
+    sessionStorage.removeItem('create_form_submitted');
+
+    // load saved data on page load
     inputs.forEach(input => {
         const saved = localStorage.getItem('create_draft_' + input.name);
         if (saved && !input.value) {
             input.value = saved;
         }
     });
-    
-    // Save data as user types
+
+    // save data as user types
     inputs.forEach(input => {
         input.addEventListener('input', function() {
             localStorage.setItem('create_draft_' + input.name, input.value);
         });
     });
-    
-    // Clear saved data when form is successfully submitted
+
+    // set a flag when form is submitted so we can clear drafts only on success
     form.addEventListener('submit', function() {
-        inputs.forEach(input => {
-            localStorage.removeItem('create_draft_' + input.name);
-        });
+        sessionStorage.setItem('create_form_submitted', 'true');
     });
 });
 </script>

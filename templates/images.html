@@ -21,7 +21,7 @@
             title="click to view full resolution"
         >
             <img
-                src="{{ url_for('webring_small_file', filename=image.filename) }}"
+                src="{{ url_for('webring_tiny_file', filename=image.filename) }}"
                 alt="{{ image.alt_text or 'Image from ' + image.post_date }}"
                 loading="lazy"
             />

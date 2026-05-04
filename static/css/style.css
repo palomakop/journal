@@ -205,6 +205,11 @@ input[type=file] {
     margin-bottom: 0.3em;
 }
 
+.clear-file-btn {
+    display: none;
+    background: antiquewhite;
+}
+
 form .img-thumbnail {
     width: 300px;
     max-width: 100%;

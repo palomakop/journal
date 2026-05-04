@@ -113,12 +113,22 @@
         {% for i in range(1, 6) %}
         <div class="new-img">
             <label for="image_{{ i }}"><h3>new image {{ i }}</h3></label>
-            <input
-                type="file"
-                name="image_{{ i }}"
-                id="image_{{ i }}"
-                accept=".jpg,.jpeg,.png,.gif,.webp,.heic"
-            />
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <input
+                    type="file"
+                    name="image_{{ i }}"
+                    id="image_{{ i }}"
+                    accept=".jpg,.jpeg,.png,.gif,.webp,.heic"
+                    style="flex: 1;"
+                />
+                <button
+                    type="button"
+                    class="btn clear-file-btn"
+                    data-target="image_{{ i }}"
+                >
+                    clear
+                </button>
+            </div>
             <label for="alt_text_{{ i }}">description</label>
             <input
                 type="text"
@@ -147,6 +157,7 @@
     />
 </form>
 
+<script src="{{ url_for('static', filename='js/clear-file-button.js') }}"></script>
 <script>
 // auto-save form data as user types
 document.addEventListener('DOMContentLoaded', function() {

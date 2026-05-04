@@ -229,6 +229,7 @@ def create_all_image_versions(temp_path, base_filename):
     """
     create all required image versions from temporary upload.
     returns dict with success status for each version.
+    opens image once and reuses for better performance.
     """
     results = {
         'original': False,
@@ -237,22 +238,66 @@ def create_all_image_versions(temp_path, base_filename):
         'webring_tiny': False
     }
 
-    # original (metadata stripped)
-    original_path = os.path.join(UPLOAD_FOLDER, base_filename)
-    results['original'] = strip_image_metadata(temp_path, original_path)
+    try:
+        # open image once and apply rotation
+        with Image.open(temp_path) as img:
+            img = ImageOps.exif_transpose(img)
 
-    # 1200px optimized
-    optimized_filename = f"opt_{base_filename}"
-    optimized_path = os.path.join(OPTIMIZED_FOLDER, optimized_filename)
-    results['opt_1200'] = optimize_image(temp_path, optimized_path, OPTIMIZED_WIDTH)
+            # convert to RGB for consistency
+            if img.mode in ('RGBA', 'LA', 'P'):
+                if img.mode == 'P':
+                    img = img.convert('RGBA')
+                background = Image.new('RGB', img.size, (255, 255, 255))
+                if img.mode == 'RGBA':
+                    background.paste(img, mask=img.split()[-1])
+                img = background
+            elif img.mode != 'RGB':
+                img = img.convert('RGB')
 
-    # webring small version
-    webring_small_path = os.path.join(WEBRING_SMALL_FOLDER, base_filename)
-    results['webring_small'] = optimize_image(temp_path, webring_small_path, WEBRING_SMALL_WIDTH)
+            # save original (metadata stripped)
+            original_path = os.path.join(UPLOAD_FOLDER, base_filename)
+            img.save(original_path, 'JPEG', quality=95, optimize=True, exif=b"")
+            results['original'] = True
 
-    # webring tiny thumbnail
-    webring_tiny_path = os.path.join(WEBRING_TINY_FOLDER, base_filename)
-    results['webring_tiny'] = optimize_image(temp_path, webring_tiny_path, WEBRING_TINY_WIDTH)
+            # 1200px optimized
+            optimized_filename = f"opt_{base_filename}"
+            optimized_path = os.path.join(OPTIMIZED_FOLDER, optimized_filename)
+            width, height = img.size
+            if width > OPTIMIZED_WIDTH:
+                ratio = OPTIMIZED_WIDTH / width
+                new_height = int(height * ratio)
+                img_1200 = img.resize((OPTIMIZED_WIDTH, new_height), Image.Resampling.LANCZOS)
+                img_1200.save(optimized_path, 'JPEG', quality=85, optimize=True, exif=b"")
+            else:
+                img.save(optimized_path, 'JPEG', quality=85, optimize=True, exif=b"")
+            results['opt_1200'] = True
+
+            # webring small version
+            webring_small_path = os.path.join(WEBRING_SMALL_FOLDER, base_filename)
+            if width > WEBRING_SMALL_WIDTH:
+                ratio = WEBRING_SMALL_WIDTH / width
+                new_height = int(height * ratio)
+                img_small = img.resize((WEBRING_SMALL_WIDTH, new_height), Image.Resampling.LANCZOS)
+                img_small.save(webring_small_path, 'JPEG', quality=85, optimize=True, exif=b"")
+            else:
+                img.save(webring_small_path, 'JPEG', quality=85, optimize=True, exif=b"")
+            results['webring_small'] = True
+
+            # webring tiny thumbnail
+            webring_tiny_path = os.path.join(WEBRING_TINY_FOLDER, base_filename)
+            if width > WEBRING_TINY_WIDTH:
+                ratio = WEBRING_TINY_WIDTH / width
+                new_height = int(height * ratio)
+                img_tiny = img.resize((WEBRING_TINY_WIDTH, new_height), Image.Resampling.LANCZOS)
+                img_tiny.save(webring_tiny_path, 'JPEG', quality=85, optimize=True, exif=b"")
+            else:
+                img.save(webring_tiny_path, 'JPEG', quality=85, optimize=True, exif=b"")
+            results['webring_tiny'] = True
+
+    except Exception as e:
+        print(f"error creating image versions: {e}")
+        import traceback
+        traceback.print_exc()
 
     return results
 

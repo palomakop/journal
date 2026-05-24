@@ -9,8 +9,8 @@ from datetime import date, datetime
 from functools import wraps
 from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename
-from werkzeug.urls import url_parse
 from flask import Flask, render_template, request, url_for, flash, redirect, session, send_from_directory
+from urllib.parse import urlparse
 from werkzeug.exceptions import abort
 from markupsafe import Markup
 from dotenv import load_dotenv
@@ -725,7 +725,7 @@ def login():
             
             # redirect to next page if specified, otherwise to index
             next_page = request.args.get('next')
-            if next_page and url_parse(next_page).netloc:
+            if next_page and urlparse(next_page).netloc:
                 # reject external redirects
                 next_page = None
             return redirect(next_page or url_for('index'))
